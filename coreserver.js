@@ -22,7 +22,7 @@ module.exports = function(params) {
   }
   
   // Listener
-  this.listen() {
+  this.listen = function() {
     
   }
   
