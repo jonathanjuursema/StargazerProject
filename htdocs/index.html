@@ -4,7 +4,8 @@
 		<!--Import Google Icon Font-->
 		<link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 		<!--Import materialize.css-->
-		<link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/>
+		<!-- Compiled and minified CSS -->
+  		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.1/css/materialize.min.css">
 		<!--Import main.css-->
 		<link type="text/css" rel="stylesheet" href="css/main.css"  media="screen,projection"/>
 
@@ -18,9 +19,11 @@
 				<div class="nav-wrapper">
 				  <a href="#" class="brand-logo">Logo</a>
 				  <ul id="nav-mobile" class="right hide-on-med-and-down">
+				  	<!--
 				    <li><a href="sass.html">Sass</a></li>
 				    <li><a href="badges.html">Components</a></li>
 				    <li><a href="collapsible.html">JavaScript</a></li>
+				    -->
 				  </ul>
 				</div>
 			</nav>
@@ -32,17 +35,24 @@
 			<div class="row">
 		      <div class="col s12 m7 offset-m2">
 		        <div class="card-panel center-align">
-		          <span class="black-text"><h1>Welcome to the Stargaze interface!</h1></span>
+		          <span class="black-text"><h1 style="font-weight: 900;">Welcome to the Stargaze interface!</h1></span>
 		        </div>
 		      </div>
 		    </div>
 
 			<div class="row">
-		      <div class="col s12 m5 offset-m3">
+		      <div class="col s12 m7 offset-m2">
 		        <div class="card-panel center-align">
-		          <span class="black-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aspernatur, eum deserunt temporibus tempore repellat quam, sunt odio hic rem vitae doloribus delectus optio sit ab saepe facilis corrupti laborum similique.</span>
+		          <span class="black-text"><p class="flow-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aspernatur, eum deserunt temporibus tempore repellat quam, sunt odio hic rem vitae doloribus delectus optio sit ab saepe facilis corrupti laborum similique.</p></span>
 		        </div>
 		      </div>
+		    </div>
+			
+			<div class="row">
+		    	<div class="col s12 m5 offset-m3">
+		    		<a class="waves-effect waves-light btn-large"><i class="material-icons left">my_location</i>Track ISS</a>
+		    		<a class="waves-effect waves-light btn-large"><i class="material-icons left">location_on</i>Upload Location</a>
+		    	</div>
 		    </div>
 
 	    </div>
@@ -57,24 +67,29 @@
               <div class="col l4 offset-l2 s12">
                 <h5 class="white-text">Links</h5>
                 <ul>
-                  <li><a class="grey-text text-lighten-3" href="#!">Link 1</a></li>
-                  <li><a class="grey-text text-lighten-3" href="#!">Link 2</a></li>
-                  <li><a class="grey-text text-lighten-3" href="#!">Link 3</a></li>
-                  <li><a class="grey-text text-lighten-3" href="#!">Link 4</a></li>
+                  <li><a class="grey-text text-lighten-3" href="#!">About</a></li>
+                  <li><a class="grey-text text-lighten-3" href="#!">Contact</a></li>
+                  <li><a class="grey-text text-lighten-3" href="#!">License</a></li>
+                  <li><a class="grey-text text-lighten-3" href="http://www.stellarium.org/" target="blank">Stellarium</a></li>
                 </ul>
               </div>
             </div>
           </div>
           <div class="footer-copyright">
             <div class="container">
-            © 2014 Copyright Text
+            © 2015 Copyright Stargaze Team
             <a class="grey-text text-lighten-4 right" href="#!">More Links</a>
             </div>
           </div>
         </footer>
-
+	
+		<!--Import Socket.IO-->
+		<script type="text/javascript" src="//cdn.socket.io/socket.io-1.3.7.js"></script>
 		<!--Import jQuery before materialize.js-->
-		<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-		<script type="text/javascript" src="js/materialize.min.js"></script>
+		<script type="text/javascript" src="//code.jquery.com/jquery-2.1.1.min.js"></script>
+		<!-- Compiled and minified JavaScript -->
+  		<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.1/js/materialize.min.js"></script>
+		<!--Import our own main.js-->
+		<script type="text/javascript" src="./js/main.js"></script>
     </body>
   </html>
