@@ -25,3 +25,12 @@ initServer({
   type: 'Stellarium',
   telescopeType: 'laz0r'
 });
+
+/* Webserver code Express */
+
+// Requires
+var express = require('express');
+var webserver = express();
+
+webserver.use(express.static('htdocs'));
+webserver.listen(process.env.PORT || 80);
