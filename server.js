@@ -1,7 +1,8 @@
 /* Loading required dependencies. */
 var express = require('express');
-var webserver = express();
-var socketio = require('socket.io')(webserver.Server);
+var app = express();
+var http = require('http').Server(app);
+var socketio = require('socket.io')(http);
 
 /* Loading local modules. */
 var coreserver = require('./coreserver.js');
@@ -20,8 +21,8 @@ var stellarium = new stellariumserver({
 });
 
 /* Starting webserver */
-webserver.use(express.static('htdocs'));
-webserver.listen(process.env.PORT || 5000);
+app.use(express.static('htdocs'));
+http.listen(process.env.PORT || 5000);
 
 /* Handling Socket.IO input */
 socketio.on('connection', function(socket) {
