@@ -1,36 +1,19 @@
-var Stellarium = require('node-telescope-server/servers/stellarium.js');
-var Telescope = require('node-telescope-server/telescopes/dummy.js');
+/* Loading required dependencies. */
+var express = require('express');
+var webserver = express();
 
-function initServer(params) {
-  var server = new Stellarium(params);
-  var laser = new Telescope(params);
+/* Loading local modules. */
+var stellariumserver = require('./stellariumserver.js')
 
-  server.on('goto', function (position) {
-    laser.goto(position);
-  });
-
-  laser.on('track', function (position) {
-    server.track(position);
-  });
-
-  server.listen();
-
-  return server;
-}
-
-initServer({
-  port: 5001,
+/* Starting Stellarium server. */
+stellariumserver.init({
+  port: 5050,
   debug: false,
   quiet: false,
   type: 'Stellarium',
   telescopeType: 'laz0r'
 });
 
-/* Webserver code Express */
-
-// Requires
-var express = require('express');
-var webserver = express();
-
+/* Starting webserver */
 webserver.use(express.static('htdocs'));
-webserver.listen(process.env.PORT || 80);
+webserver.listen(process.env.PORT || 5000);
