@@ -17,8 +17,6 @@ module.exports = function(params) {
   this.init = function() {
     s.servermode = 0;
     s.target = {'ra':0.0,'dec':0.0};
-    
-    s.listen();
   }
   
   // Listener

@@ -15,7 +15,8 @@
   },
   "dependencies": {
     "node-telescope-server": "latest",
-    "express": "latest"
+    "express": "latest",
+    "socket.io": "latest"
   },
   "preferGlobal": "false",
   "main": "server",
