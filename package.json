@@ -1,0 +1,27 @@
+{
+  "author": "Jonathan Juursema <j.a.j.juursema@student.utwente.nl>",
+  "contributor": [
+    { 
+      "name": "Peter Verzijl"
+    }
+  ],
+  "name": "utwente-stellarium-to-laser",
+  "description": "Operate and point a laser to point at certain objects in the sky, using Stellarium.",
+  "version": "0.0.0",
+  "_homepage": "https://github.com/fcsonline/node-telescope-server",
+  "_repository": {
+    "type": "git",
+    "url": "git@github.com:fcsonline/node-telescope-server.git"
+  },
+  "dependencies": {
+    "node-telescope-server": "latest",
+    "express": "latest"
+  },
+  "preferGlobal": "false",
+  "main": "server",
+  "bin": { "stargazerserver": "./server.js" },
+  "engines": {
+    "node": "*"
+  }
+}
+
