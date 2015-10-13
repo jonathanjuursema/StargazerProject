@@ -3,15 +3,19 @@ var express = require('express');
 var webserver = express();
 
 /* Loading local modules. */
-var stellariumserver = require('./stellariumserver.js')
+var coreserver = require('./coreserver.js');
+var stellariumserver = require('./stellariumserver.js');
+
+/* Starting core server. */
+var server = new coreserver();
 
 /* Starting Stellarium server. */
-stellariumserver.init({
-  port: 5050,
-  debug: false,
-  quiet: false,
-  type: 'Stellarium',
-  telescopeType: 'laz0r'
+var stellarium = new stellariumserver({
+      port: 5050,
+      debug: false,
+      quiet: true,
+      type: 'Stellarium',
+      telescopeType: 'laser'
 });
 
 /* Starting webserver */

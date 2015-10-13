@@ -1,19 +1,20 @@
-var stellarium = require('node-telescope-server/servers/stellarium.js');
-var telescope = require('node-telescope-server/telescopes/dummy.js');
+var stellariumservermodule = require('node-telescope-server/servers/stellarium.js');
 
-exports.init = function(params) {
-  var server = new stellarium(params);
-  var laser = new telescope(params);
+module.exports = function(params) {
+  var stellariumserverinstance = new stellariumservermodule(params);
 
-  server.on('goto', function (position) {
-    laser.goto(position);
+  // This intercepts the input of Stellarium, sending it along to our core server.
+  stellariumserverinstance.on('goto', function (position) {
+    server.settarget(position);
   });
 
+  /* This is going to be used to handle the feedback from the gimble, sending current direction vector back to Stellarium.
   laser.on('track', function (position) {
-    server.track(position);
+    stellariumserverinstance.track(position);
   });
+  */
 
-  server.listen();
+  stellariumserverinstance.listen();
 
-  return server;
+  return stellariumserverinstance;
 }
