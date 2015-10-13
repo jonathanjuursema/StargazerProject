@@ -24,6 +24,6 @@ webserver.use(express.static('htdocs'));
 webserver.listen(process.env.PORT || 5000);
 
 /* Handling Socket.IO input */
-socketio.on('connection', function(socket)) {
+socketio.on('connection', function(socket) {
   console.info("A new connection was established.");
-}
+});
