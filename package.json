@@ -8,10 +8,9 @@
   "name": "utwente-stellarium-to-laser",
   "description": "Operate and point a laser to point at certain objects in the sky, using Stellarium.",
   "version": "0.0.0",
-  "_homepage": "https://github.com/fcsonline/node-telescope-server",
-  "_repository": {
+  "repository": {
     "type": "git",
-    "url": "git@github.com:fcsonline/node-telescope-server.git"
+    "url": "git@github.com:jonathanjuursema/StargazerServer.git"
   },
   "dependencies": {
     "node-telescope-server": "latest",
@@ -19,10 +18,11 @@
     "socket.io": "latest"
   },
   "preferGlobal": "false",
-  "main": "server",
+  "main": "server.js",
   "bin": { "stargazerserver": "./server.js" },
   "engines": {
     "node": "*"
-  }
+  },
+  "license": "GPL-2.0"
 }
 
