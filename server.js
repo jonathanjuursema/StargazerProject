@@ -82,6 +82,7 @@ var coreserver = function(params) {
   }
   
   this.setlocation = function(newlocation) {
+    console.log(newlocation);
     if(!(newlocation.lat === Number(newlocation.lat) && newlocation.lat % 1 !== 0) || !(newlocation.lon === Number(newlocation.lon) && newlocation.lon % 1 !== 0)) {
       console.warn("New location ["+newlocation.lat+", "+newlocation.lon+"] are not valid. Keeping old one.");
       sendgui('message',{'text': "Recevied invalid coordinates ["+newlocation.lat+", "+newlocation.lon+"], keeping old one."});
@@ -155,8 +156,8 @@ socketio.on('connection', function(socket) {
     server.setmode(data.mode);    
   });
   
-  socket.on('location', function(data) {
-    server.setlocation(data.lat, data.lon);
+  socket.on('setlocation', function(data) {
+    server.setlocation(data);
   });
   
   socket.on('disconnect', function() {

@@ -60,17 +60,18 @@ function getLocation() {
 	// Call Nav API
 	navigator.geolocation.getCurrentPosition(
 		function(position) {
-			// Send to socket io
-			console.log("Now sending coordinates: lat " + position.coords.latitude + ", lon " + position.coords.longitude);
+			var lat = position.coords.latitude;
+			var lon = position.coords.longitude;
+
 			// User feedback
-			spawnMessagePanel("Now sending coordinates: lat " + position.coords.latitude + ", lon " + position.coords.longitude, 'green');
+			console.log({lat: lat, lon: lon});
+			spawnMessagePanel("Now sending coordinates...", 'green');
 			
-			socket.emit('setlocation', {lat: position.coords.latitude, lon: position.coords.longitude})
+			socket.emit('setlocation', {lat: lat, lon: lon});
 		}, 
 		function(err) {
-			spawnMessagePanel('ERROR(' + err.code + '): ' + err.message, 'red');
 			// User feedback
-			spawnMessagePanel('Oeps, something went wrong. \n' + 'ERROR(' + err.code + '): ' + err.message);
+			spawnMessagePanel('Oeps, something went wrong.' + '</br>' + 'ERROR(' + err.code + '): ' + err.message, 'red');
 			return 'ERROR(' + err.code + '): ' + err.message;
 		}, 
 			{
@@ -81,43 +82,36 @@ function getLocation() {
 		);
 }
 
-var colorArray = ['red', 'pink', 'purple', 'deep-purple', 'indigo', 'blue', 'light-blue', 'cyan', 'teal', 'green', 'light-green', 'lime', 'yellow', 'amber', 'orange', 'deep-orange', 'brown', 'grey', 'blue-grey', 'black', 'white'];
 function spawnMessagePanel(message, color) {
-	var $panel = $('.mesg-panel');
-	var $text = $panel.find('.card-panel');
-	$text.html(message);
-
-	// Show spinner
-	$text.html(message);
-
-	// remove old colors
-	for (var i = colorArray.length - 1; i >= 0; i--) {
-		$text.removeClass(colorArray[i]);
-	};
 	
-	$text.addClass(color);
-	$panel.slideDown(500).delay(1000).slideUp(500);
+	var node = $(
+		'<div class="row mesg-panel"><div class="col s12 m8 offset-m2"><div class="card-panel center-align ' + 
+		color + 
+		' " darken-4 white-text">' + 
+		message + 
+		'</div></div></div>'
+		);
+	node.slideUp(0);
+	$('.message-queue').after(node);
+	$('.mesg-panel').hide().slideDown(300).delay(1000).slideUp(300, function() {
+		$(this).remove();
+	});
 }
 
 function spawnDisconnectedMessage(message, color) {
-	var $panel = $('.mesg-panel');
-	var $text = $panel.find('.card-panel');
-	$text.html(message);
+	
+	// Create new node
 
-	// Show spinner
-	$text.html(
+	var node = $(
+		'<div class="row mesg-panel err-msg"><div class="col s12 m8 offset-m2"><div class="card-panel center-align ' + 
+		color + 
+		' " darken-4 white-text">' + 
 		message + 
-		"\n" + 
-		"<div class='progress'><div class='indeterminate'></div></div>"
-  	);
+		'<div class="progress"><div class="indeterminate"></div></div></div></div></div>'
+		);
 
-	// remove old colors
-	for (var i = colorArray.length - 1; i >= 0; i--) {
-		$text.removeClass(colorArray[i]);
-	};
-
-	$text.addClass(color);
-	$panel.slideDown(500);
+	$('.message-queue').after(node);
+	$('.mesg-panel').hide().slideDown(300);
 }
 
 socket.on('disconnect', function(err){
@@ -125,22 +119,27 @@ socket.on('disconnect', function(err){
 	spawnDisconnectedMessage('Server disconnected, trying to reconnect...', 'red');
 });
 
+socket.on('connect', function() {
+	$('.err-msg').remove();
+});
+
 socket.on('message', function(data) {
 	console.log(data.text);
-	spawnMessagePanel(data.text, 'blue');
+	//spawnMessagePanel(data.text, 'blue');
 });
 
 socket.on('init', function(/* ?? */) {
 	// Activate button row
-	console.log("Socket connected.");
-	spawnMessagePanel('Socket connected...', 'blue');
+	console.log("Server connected.");
+	spawnMessagePanel('Server connected...', 'green');
 	$('.button-row').show(500);
 });
 
-socket.on('setmode', function() {
+socket.on('setmode', function(data) {
 	// Mode set
 	// 0 out
 	// 1 track iss
 	// 2 stellarium
 	// get the mode that it would have been if error
+	console.log("Mode set to: " + data.mode);
 });
