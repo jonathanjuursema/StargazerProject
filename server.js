@@ -143,7 +143,7 @@ socketio.on('connection', function(socket) {
   if (gui === false) {
     gui = socket;
     console.info("New incoming GUI connection from "+socket.handshake.address+".");
-    gui.emit('init', {});
+    gui.emit('init', {'location':server.location,'target':server.target,'mode':server.servermode});
   } else {
     console.info("New incoming GUI connection from "+socket.handshake.address+", but we're already busy.");
     socket.emit('message', {'text':'This server is already occupied. Please try again later.'});
@@ -175,7 +175,7 @@ function sendgui(event, data) {
 
 /* Establishing SPI connection */
 
-var soc;
+var soc = false;
 
 function initspi() {
   
