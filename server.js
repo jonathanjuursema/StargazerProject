@@ -3,7 +3,7 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 var socketio = require('socket.io')(http);
-var spi = require('spi');
+var spi;
 var stellariumservermodule = require('node-telescope-server/servers/stellarium.js');
 
 /* Starting core server. */
@@ -20,6 +20,10 @@ var coreserver = function(params) {
   var servermode;  
   // Tracking target. Is only used when mode=2, but can be set when another mode is active.
   var target;
+  // Server GPS location.
+  var location;
+  // ISS location.
+  var isslocation;
   
   /* Main functions */
   
@@ -27,6 +31,8 @@ var coreserver = function(params) {
   this.init = function() {
     s.servermode = 0;
     s.target = {'ra':0.0,'dec':0.0};
+    s.location = {'lat':0.0,'lon':0.0};
+    s.isslocation = {'lat':0.0,'lon':0.0};
   }
   
   // Listener
@@ -65,12 +71,26 @@ var coreserver = function(params) {
   // Sets new target coordinates for the server
   this.settarget = function(newcoordinates) {
     if(!(newcoordinates.ra === Number(newcoordinates.ra) && newcoordinates.ra % 1 !== 0) || !(newcoordinates.dec === Number(newcoordinates.dec) && newcoordinates.dec % 1 !== 0)) {
-      console.warn("New target coordinates ("+newcoordinates.ra+", "+newcoordinates.dec+") are not valid. Keeping old ones.");
+      console.warn("New target coordinates ["+newcoordinates.ra+", "+newcoordinates.dec+"] are not valid. Keeping old ones.");
       return false;
     }
     
     s.target.ra = newcoordinates.ra; s.target.dec = newcoordinates.dec;
-    console.info("New target set to ["+s.target.ra+", "+s.target.dec+"].")
+    console.info("New target set to ["+s.target.ra+", "+s.target.dec+"].");
+    sendgui('message',{'text': 'A new target has been selected on the following celestial coordinates: RA '+s.target.ra+', DEC '+s.target.dec+'.'});
+    return true;
+  }
+  
+  this.setlocation = function(newlocation) {
+    if(!(newlocation.lat === Number(newlocation.lat) && newlocation.lat % 1 !== 0) || !(newlocation.lon === Number(newlocation.lon) && newlocation.lon % 1 !== 0)) {
+      console.warn("New location ["+newlocation.lat+", "+newlocation.lon+"] are not valid. Keeping old one.");
+      sendgui('message',{'text': "Recevied invalid coordinates ["+newlocation.lat+", "+newlocation.lon+"], keeping old one."});
+      return false;
+    }
+    
+    s.location.lat = newlocation.lat; s.location.lon = newlocation.lon;
+    console.info("New locaiton set to ["+s.location.lat+", "+s.location.lon+"].");
+    sendgui('message',{'text': "New server location has been set to ["+s.location.lat+", "+s.location.lon+"]."});
     return true;
   }
   
@@ -135,6 +155,10 @@ socketio.on('connection', function(socket) {
     server.setmode(data.mode);    
   });
   
+  socket.on('location', function(data) {
+    server.setlocation(data.lat, data.lon);
+  });
+  
   socket.on('disconnect', function() {
     console.info("Client "+socket.handshake.address+" disconnected.");
     socket.emit('message', {'text':'Disconnecting...'});
@@ -151,16 +175,58 @@ function sendgui(event, data) {
 
 /* Establishing SPI connection */
 
-var soc = new spi.Spi('/dev/spidev0.0', {}, function(s){s.open();});
+var soc;
 
-/*
+function initspi() {
+  
+  for (i = 0; i < process.argv.length; i++) {
+    if (process.argv[i] == "--nospi") {
+      console.info("SPI interface not loaded.");
+      return;
+    }
+  }
+  
+  spi = require('spi');
+  
+  soc = new spi.Spi('/dev/spidev0.0', {}, function(s){s.open();});
+  
+  console.info("SPI interface loaded.");
+
+  setInterval(function() {
+    soc.transfer(new Buffer([ 0x00 ]), new Buffer([ 0x00 ]), function(dev, buf) {
+      console.info("SPI: Test 00 sent.");
+      setTimeout(function() {
+        soc.transfer(new Buffer([ 0x42 ]), new Buffer([ 0x00 ]), function(dev, buf) {
+          console.info("SPI: Test 42 sent.");
+        });
+      }, 1000);
+    });
+  }, 2000);
+  
+}
+
+initspi();
+
+/* Fetching ISS coordinates. */
+
 setInterval(function() {
-  soc.transfer(new Buffer([ 0x00 ]), new Buffer([ 0x00 ]), function(dev, buf) {
-    console.info("SPI: Test 00 sent.");
-    setTimeout(function() {
-      soc.transfer(new Buffer([ 0x42 ]), new Buffer([ 0x00 ]), function(dev, buf) {
-        console.info("SPI: Test 42 sent.");
+  if (server.servermode == 1) {
+    require('http').get("http://api.open-notify.org/iss-now.json", function(res){
+      var body = '';
+
+      res.on('data', function(chunk){
+          body += chunk;
       });
-    }, 1000);
-  });
-}, 2000);*/
+
+      res.on('end', function(){
+          var response = JSON.parse(body);
+          console.log("Got these GPS coordinates: ", response.iss_position);
+          server.isslocation.lat = response.iss_position.latitude;
+          server.isslocation.lon = response.iss_position.longitude;
+          
+      });
+    }).on('error', function(e){
+          console.warn("Got an error during scraping of ISS location: ", e);
+    });
+  }
+}, 1000);
