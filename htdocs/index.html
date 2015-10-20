@@ -1,5 +1,5 @@
- <!DOCTYPE html>
-  <html>
+<!DOCTYPE html>
+<html>
     <head>
 		<!--Import Google Icon Font-->
 		<link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -15,9 +15,9 @@
 
     <body>
     	<div class="navbar-fixed">
-			<nav>
+			<nav class="blue-grey darken-4">
 				<div class="nav-wrapper">
-				  <a href="#" class="brand-logo">Logo</a>
+				  <a href="#" class="brand-logo"><img src="/img/logo.svg" alt="/img/logo.png"></a>
 				  <ul id="nav-mobile" class="right hide-on-med-and-down">
 				  	<!--
 				    <li><a href="sass.html">Sass</a></li>
@@ -33,36 +33,44 @@
 			<!-- Page Content goes here -->
 	
 			<div class="row">
-		      <div class="col s12 m7 offset-m2">
+		      <div class="col s12 m8 offset-m2">
 		        <div class="card-panel center-align">
-		          <span class="black-text"><h1 style="font-weight: 900;">Welcome to the Stargaze interface!</h1></span>
+		          <span class="black-text"><h1 class="header-text" style="font-weight: 900;">Welcome to Stargaze!</h1></span>
 		        </div>
 		      </div>
 		    </div>
 
 			<div class="row">
-		      <div class="col s12 m7 offset-m2">
+		      <div class="col s12 m8 offset-m2">
 		        <div class="card-panel center-align">
-		          <span class="black-text"><p class="flow-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aspernatur, eum deserunt temporibus tempore repellat quam, sunt odio hic rem vitae doloribus delectus optio sit ab saepe facilis corrupti laborum similique.</p></span>
+		          <span class="black-text"><p class="flow-text">This is the web interface for controlling the Stargaze star pointer. Send your position to the server controlled laser pointer and select wether to track Stellarium&copy; or your location.</p></span>
 		        </div>
 		      </div>
 		    </div>
+
+		    <div class="row mesg-panel">
+		    	<div class="col s12 m8 offset-m2">
+		    		<div class="card-panel center-align darken-4 white-text">
+						Message panel
+			        </div>
+		    	</div>
+		    </div>
 			
-			<div class="row">
-		    	<div class="col s12 m5 offset-m3">
-		    		<a class="waves-effect waves-light btn-large"><i class="material-icons left">my_location</i>Track ISS</a>
-		    		<a class="waves-effect waves-light btn-large"><i class="material-icons left">location_on</i>Upload Location</a>
+			<div class="row button-row">
+		    	<div class="col s12 m8 offset-m2">
+		    		<a class="waves-effect waves-light btn-large red darken-4 trackISS"><i class="material-icons left">my_location</i>Track ISS</a>
+		    		<a class="waves-effect waves-light btn-large light-blue darken-2 sendLoc"><i class="material-icons left">location_on</i>Send Location</a>
 		    	</div>
 		    </div>
 
-	    </div>
+	    </div><!-- End container -->
 
-		<footer class="page-footer">
+		<footer class="page-footer blue-grey darken-4">
           <div class="container">
             <div class="row">
               <div class="col l6 s12">
-                <h5 class="white-text">Footer Content</h5>
-                <p class="grey-text text-lighten-4">You can use rows and columns here to organize your footer content.</p>
+                <h5 class="white-text">About Stargazer</h5>
+                <p class="grey-text text-lighten-4">Stargazer is a project created by Jonathan Juursema, Guido Kuijper, Rzonnie Jonkman & Peter Verzijl. It is a colaboration project between Computer Science and Electrical Engineering students. This project is its result.</p>
               </div>
               <div class="col l4 offset-l2 s12">
                 <h5 class="white-text">Links</h5>
@@ -70,14 +78,14 @@
                   <li><a class="grey-text text-lighten-3" href="#!">About</a></li>
                   <li><a class="grey-text text-lighten-3" href="#!">Contact</a></li>
                   <li><a class="grey-text text-lighten-3" href="#!">License</a></li>
-                  <li><a class="grey-text text-lighten-3" href="http://www.stellarium.org/" target="blank">Stellarium</a></li>
+                  <li><a class="grey-text text-lighten-3" href="http://www.stellarium.org/" target="blank">Stellarium&copy;</a></li>
                 </ul>
               </div>
             </div>
           </div>
-          <div class="footer-copyright">
+          <div class="footer-copyright blue-grey darken-3">
             <div class="container">
-            © 2015 Copyright Stargaze Team
+            &copy; 2015 Copyright Stargaze Team
             <a class="grey-text text-lighten-4 right" href="#!">More Links</a>
             </div>
           </div>
@@ -90,6 +98,6 @@
 		<!-- Compiled and minified JavaScript -->
   		<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.1/js/materialize.min.js"></script>
 		<!--Import our own main.js-->
-		<script type="text/javascript" src="./js/main.js"></script>
+		<script type="text/javascript" src="/js/main.js"></script>
     </body>
-  </html>
+</html>

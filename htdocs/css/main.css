@@ -11,3 +11,12 @@ body {
 main {
 	flex: 1 0 auto;
 }
+
+.brand-logo img {
+	height: 64px;
+	width: auto;
+}
+
+.header-text {
+	margin: 0;
+}
