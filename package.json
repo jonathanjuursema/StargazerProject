@@ -15,7 +15,8 @@
   "dependencies": {
     "node-telescope-server": "latest",
     "express": "latest",
-    "socket.io": "latest"
+    "socket.io": "latest",
+    "spi": "latest"
   },
   "preferGlobal": "false",
   "main": "server.js",
