@@ -4,7 +4,7 @@ var app = express();
 var http = require('http').Server(app);
 var socketio = require('socket.io')(http);
 var spi;
-var stellariumservermodule = require('node-telescope-server/servers/stellarium.js');
+var stellariumservermodule = require('./stellarium.js');
 
 /* Starting core server. */
 
@@ -70,22 +70,24 @@ var coreserver = function(params) {
   
   // Sets new target coordinates for the server
   this.settarget = function(newcoordinates) {
+    newcoordinates.ra = s.convertstellariumcoordinates(newcoordinates.ra);
+    newcoordinates.dec = s.convertstellariumcoordinates(newcoordinates.dec);
+    
     if(!(newcoordinates.ra === Number(newcoordinates.ra) && newcoordinates.ra % 1 !== 0) || !(newcoordinates.dec === Number(newcoordinates.dec) && newcoordinates.dec % 1 !== 0)) {
       console.warn("New target coordinates ["+newcoordinates.ra+", "+newcoordinates.dec+"] are not valid. Keeping old ones.");
       return false;
     }
     
     s.target.ra = newcoordinates.ra; s.target.dec = newcoordinates.dec;
-    console.info("New target set to ["+s.target.ra+", "+s.target.dec+"].");
+    console.info("New target set to [RA "+s.target.ra+", DEC "+s.target.dec+"].");
     sendgui('message',{'text': 'A new target has been selected on the following celestial coordinates: RA '+s.target.ra+', DEC '+s.target.dec+'.'});
     return true;
   }
   
   this.setlocation = function(newlocation) {
-    console.log(newlocation);
     if(!(newlocation.lat === Number(newlocation.lat) && newlocation.lat % 1 !== 0) || !(newlocation.lon === Number(newlocation.lon) && newlocation.lon % 1 !== 0)) {
       console.warn("New location ["+newlocation.lat+", "+newlocation.lon+"] are not valid. Keeping old one.");
-      sendgui('message',{'text': "Recevied invalid coordinates ["+newlocation.lat+", "+newlocation.lon+"], keeping old one."});
+      sendgui('message',{'text': "Recevied invalid coordinates ["+newlocation.lat+", "+newlocation.lon+"], keeping old ones."});
       return false;
     }
     
@@ -93,6 +95,11 @@ var coreserver = function(params) {
     console.info("New locaiton set to ["+s.location.lat+", "+s.location.lon+"].");
     sendgui('message',{'text': "New server location has been set to ["+s.location.lat+", "+s.location.lon+"]."});
     return true;
+  }
+  
+  this.convertstellariumcoordinates = function(coordinate) {
+    coordinate = ((coordinate / (2*Math.PI)) * 360);
+    return (coordinate > 180 ? (coordinate - 360) : coordinate);
   }
   
   this.init();
@@ -127,7 +134,7 @@ var stellarium = new stellariumserver({
       debug: false,
       quiet: true,
       type: 'Stellarium',
-      telescopeType: 'laser'
+      telescopeType: 'Stargazer'
 });
 
 /* Starting webserver */
@@ -189,20 +196,18 @@ function initspi() {
   
   spi = require('spi');
   
-  soc = new spi.Spi('/dev/spidev0.0', {}, function(s){s.open();});
+  soc = new spi.Spi('/dev/spidev0.0', {'chipSelect': spi.CS['none'], 'mode': spi.MODE['MODE_2'], 'maxSpeed': 1000000, 'bitOrder': false}, function(s){s.open();});
   
   console.info("SPI interface loaded.");
 
   setInterval(function() {
     soc.transfer(new Buffer([ 0x00 ]), new Buffer([ 0x00 ]), function(dev, buf) {
-      console.info("SPI: Test 00 sent.");
       setTimeout(function() {
-        soc.transfer(new Buffer([ 0x42 ]), new Buffer([ 0x00 ]), function(dev, buf) {
-          console.info("SPI: Test 42 sent.");
+        soc.transfer(new Buffer([ 0x11 ]), new Buffer([ 0x00 ]), function(dev, buf) {
         });
-      }, 1000);
+      }, 500);
     });
-  }, 2000);
+  }, 1000);
   
 }
 
