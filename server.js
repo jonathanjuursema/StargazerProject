@@ -70,8 +70,7 @@ var coreserver = function(params) {
   
   // Sets new target coordinates for the server
   this.settarget = function(newcoordinates) {
-    newcoordinates.ra = s.convertstellariumcoordinates(newcoordinates.ra);
-    newcoordinates.dec = s.convertstellariumcoordinates(newcoordinates.dec);
+    newcoordinates = s.convertstellariumcoordinates(newcoordinates);
     
     if(!(newcoordinates.ra === Number(newcoordinates.ra) && newcoordinates.ra % 1 !== 0) || !(newcoordinates.dec === Number(newcoordinates.dec) && newcoordinates.dec % 1 !== 0)) {
       console.warn("New target coordinates ["+newcoordinates.ra+", "+newcoordinates.dec+"] are not valid. Keeping old ones.");
@@ -79,7 +78,7 @@ var coreserver = function(params) {
     }
     
     s.target.ra = newcoordinates.ra; s.target.dec = newcoordinates.dec;
-    console.info("New target set to [RA "+s.target.ra+", DEC "+s.target.dec+"].");
+    console.info("New target set to [RA "+s.target.ra+" hrs, DEC "+s.target.dec+" deg].");
     sendgui('message',{'text': 'A new target has been selected on the following celestial coordinates: RA '+s.target.ra+', DEC '+s.target.dec+'.'});
     return true;
   }
@@ -92,14 +91,18 @@ var coreserver = function(params) {
     }
     
     s.location.lat = newlocation.lat; s.location.lon = newlocation.lon;
-    console.info("New locaiton set to ["+s.location.lat+", "+s.location.lon+"].");
+    console.info("New locaiton set to [LAT "+s.location.lat+" deg, LON "+s.location.lon+" deg].");
     sendgui('message',{'text': "New server location has been set to ["+s.location.lat+", "+s.location.lon+"]."});
     return true;
   }
   
-  this.convertstellariumcoordinates = function(coordinate) {
-    coordinate = ((coordinate / (2*Math.PI)) * 360);
-    return (coordinate > 180 ? (coordinate - 360) : coordinate);
+  this.convertstellariumcoordinates = function(coordinates) {
+    coordinates.ra = ((coordinates.ra / (2*Math.PI)) * 24);
+    
+    coordinates.dec = ((coordinates.dec / (2*Math.PI)) * 360);
+    coordinates.dec = (coordinates.dec > 180 ? (coordinates.dec - 360) : coordinates.dec);
+    
+    return coordinates;
   }
   
   this.init();
@@ -203,7 +206,7 @@ function initspi() {
   setInterval(function() {
     soc.transfer(new Buffer([ 0x00 ]), new Buffer([ 0x00 ]), function(dev, buf) {
       setTimeout(function() {
-        soc.transfer(new Buffer([ 0x11 ]), new Buffer([ 0x00 ]), function(dev, buf) {
+        soc.transfer(new Buffer([ 0x42 ]), new Buffer([ 0x00 ]), function(dev, buf) {
         });
       }, 500);
     });
