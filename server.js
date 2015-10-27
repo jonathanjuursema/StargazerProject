@@ -6,6 +6,16 @@ var socketio = require('socket.io')(http);
 var spi;
 var stellariumservermodule = require('./stellarium.js');
 
+Number.prototype.mod = function(n) {
+    return ((this%n)+n)%n;
+};
+Number.prototype.torad = function() {
+    return this * Math.PI / 180;
+};
+Number.prototype.todeg = function() {
+    return this * 180 / Math.PI;
+};
+
 /* Starting core server. */
 
 var coreserver = function(params) {
@@ -80,6 +90,7 @@ var coreserver = function(params) {
     s.target.ra = newcoordinates.ra; s.target.dec = newcoordinates.dec;
     console.info("New target set to [RA "+s.target.ra+" hrs, DEC "+s.target.dec+" deg].");
     sendgui('message',{'text': 'A new target has been selected on the following celestial coordinates: RA '+s.target.ra+', DEC '+s.target.dec+'.'});
+        
     return true;
   }
   
@@ -96,6 +107,16 @@ var coreserver = function(params) {
     return true;
   }
   
+  this.getj2000date = function() {
+    // J2000 calculation comes from http://jtauber.github.io/mars-clock/
+    var d = new Date(); // current time
+    var m = d.getTime(); // ms since unix epoch UTC
+    var jdut = 2440587.5 + (m / 86400000); // julian date (see site)
+    var jdtt = jdut + ((35+32.184) / 86400); // julian date accounting for leap seconds (see site)
+    var j2000 = jdtt - 2451545; // conversion to J2000 date! yay! (see site)
+    return j2000;
+  }
+  
   this.convertstellariumcoordinates = function(coordinates) {
     coordinates.ra = ((coordinates.ra / (2*Math.PI)) * 24);
     
@@ -103,6 +124,39 @@ var coreserver = function(params) {
     coordinates.dec = (coordinates.dec > 180 ? (coordinates.dec - 360) : coordinates.dec);
     
     return coordinates;
+  }
+  
+  this.calculatesphericalcoordinates = function(coordinates) {
+    
+    if (s.location.lat == 0 && s.location.lon == 0) {
+      console.warn("No GPS coordinates known. Could not calculate spherical coordinates from celestial coordinates.");
+      sendgui('message',{'text': "Stellarium tracking is activated, but no GPS coordinates are known. Please send your GPS location."});
+      return false;
+    }
+    
+    var d = new Date();
+    
+    // calculation comes from http://www.stargazing.net/kepler/altaz.html
+    coordinates.ra = coordinates.ra * (360/24); // convert from hours to degrees
+    coordinates.lst = ( 100.46 + 0.985647 * s.getj2000date() + s.location.lon + ( 15 * ( d.getUTCHours() + (d.getUTCMinutes()/60) ) ) ); // get local siderial time (see site)
+    coordinates.lst = coordinates.lst.mod(360);
+    coordinates.ha = ( coordinates.lst - coordinates.ra ); // get hour angle
+    coordinates.ha = coordinates.ha.mod(360);
+    
+    coordinates.sinalt = Math.sin(coordinates.dec.torad()) * Math.sin(s.location.lat.torad()) + Math.cos(coordinates.dec.torad()) * Math.cos(s.location.lat.torad()) * Math.cos(coordinates.ha.torad());
+    coordinates.alt = Math.asin(coordinates.sinalt);
+    coordinates.cosaz = ( Math.sin(coordinates.dec.torad()) - Math.sin(coordinates.alt) * Math.sin(s.location.lat.torad()) ) / ( Math.cos(coordinates.alt) * Math.cos(s.location.lat.torad()) );
+    coordinates.az = Math.acos(coordinates.cosaz);
+    
+    coordinates.alt = coordinates.alt.todeg();
+    if (Math.sin(coordinates.ha.torad()) >= 0) {
+      coordinates.az = 360 - coordinates.az.todeg();
+    } else {
+      coordinates.az = coordinates.az.todeg();
+    }
+    
+    return coordinates;
+    
   }
   
   this.init();
