@@ -34,7 +34,7 @@ var coreserver = function() {
   var location;
   // ISS location.
   var isslocation;
-  
+    
   /* Main functions */
   
   // Init function
@@ -43,7 +43,7 @@ var coreserver = function() {
     s.target = {'ra':0.0,'dec':0.0};
     s.location = {'lat':0.0,'lon':0.0};
     s.isslocation = {'lat':0.0,'lon':0.0};
-    setInterval(s.bursttosoc, 10000);
+    setInterval(s.bursttosoc, 100);
   }
   
   // Listener
@@ -118,6 +118,11 @@ var coreserver = function() {
     return j2000;
   }
   
+  this.getj2000hour = function() {
+    var d = new Date(), h = d.getUTCHours(), m = d.getUTCMinutes(), s = d.getUTCSeconds(), u = d.getUTCMilliseconds();
+    return (h + (m/60) + (s/3600) + (u/(3600*1000)));
+  }
+  
   this.convertstellariumcoordinates = function(coordinates) {
     coordinates.ra = ((coordinates.ra / (2*Math.PI)) * 24);
     
@@ -139,7 +144,7 @@ var coreserver = function() {
     
     // calculation comes from http://www.stargazing.net/kepler/altaz.html
     coordinates.ra = coordinates.ra * (360/24); // convert from hours to degrees
-    coordinates.lst = ( 100.46 + 0.985647 * s.getj2000date() + s.location.lon + ( 15 * ( d.getUTCHours() + (d.getUTCMinutes()/60) ) ) ); // get local siderial time (see site)
+    coordinates.lst = ( 100.46 + 0.985647 * s.getj2000date() + s.location.lon + ( 15 * s.getj2000hour() ) ); // get local siderial time (see site)
     coordinates.lst = coordinates.lst.mod(360);
     coordinates.ha = ( coordinates.lst - coordinates.ra ); // get hour angle
     coordinates.ha = coordinates.ha.mod(360);
@@ -159,7 +164,7 @@ var coreserver = function() {
     return coordinates;
     
   }
-  
+    
   this.bursttosoc = function() {
   
     if (soc !== false) {
@@ -169,16 +174,29 @@ var coreserver = function() {
       
       var d = new Date();
       
-      soc.write(new Buffer([ startword ]));
-      soc.write(new Buffer([ Math.round(s.location.lat * 1000000) ]));
-      soc.write(new Buffer([ Math.round(s.location.lon * 1000000) ]));
-      soc.write(new Buffer([ Math.round(s.target.ra * 1000000) ]));
-      soc.write(new Buffer([ Math.round(s.target.dec * 1000000) ]));
-      soc.write(new Buffer([ Math.round(s.getj2000date * 10000) ]));
-      soc.write(new Buffer([ Math.round( ( (d.getUTCHours() + (d.getUTCMinutes()/60)) * 1000000) ) ]));
-      soc.write(new Buffer([ endword ]));
+      s.sendsoc( startword );
+      s.sendsoc( Math.round(s.location.lat * 1000000) );
+      s.sendsoc( Math.round(s.location.lon * 1000000) );
+      s.sendsoc( Math.round(s.target.ra * 1000000) );
+      s.sendsoc( Math.round(s.target.dec * 1000000) );
+      s.sendsoc( Math.round(s.getj2000date() * 10000) );
+      s.sendsoc( Math.round(s.getj2000hour() * 1000000) );
+      s.sendsoc( endword );
+                  
+    }
+    
+  }
+  
+  this.sendsoc = function(data) {
+    
+    if (soc !== false) {
       
-      console.info("Burst to SoC completed.");
+      var txbuf = new Buffer(4);
+      var rxbuf = new Buffer(4);
+      
+      txbuf.writeInt32BE(data);
+            
+      soc.transfer(txbuf, rxbuf, function(device, buf) {});
       
     }
     
