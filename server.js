@@ -18,7 +18,7 @@ Number.prototype.todeg = function() {
 
 /* Starting core server. */
 
-var coreserver = function(params) {
+var coreserver = function() {
   
   /* Server variable initialization */
   
@@ -43,6 +43,7 @@ var coreserver = function(params) {
     s.target = {'ra':0.0,'dec':0.0};
     s.location = {'lat':0.0,'lon':0.0};
     s.isslocation = {'lat':0.0,'lon':0.0};
+    setInterval(s.bursttosoc, 10000);
   }
   
   // Listener
@@ -159,6 +160,30 @@ var coreserver = function(params) {
     
   }
   
+  this.bursttosoc = function() {
+  
+    if (soc !== false) {
+      
+      var startword = 0x7FFFFFFE; // arbitrarily chosen, but out of the reach of the data: (+360 deg, 0x15752A00; -360 deg, 0xEA8AD600)
+      var endword = 0x7FFFFFFF;
+      
+      var d = new Date();
+      
+      soc.write(new Buffer([ startword ]));
+      soc.write(new Buffer([ Math.round(s.location.lat * 1000000) ]));
+      soc.write(new Buffer([ Math.round(s.location.lon * 1000000) ]));
+      soc.write(new Buffer([ Math.round(s.target.ra * 1000000) ]));
+      soc.write(new Buffer([ Math.round(s.target.dec * 1000000) ]));
+      soc.write(new Buffer([ Math.round(s.getj2000date * 10000) ]));
+      soc.write(new Buffer([ Math.round( ( (d.getUTCHours() + (d.getUTCMinutes()/60)) * 1000000) ) ]));
+      soc.write(new Buffer([ endword ]));
+      
+      console.info("Burst to SoC completed.");
+      
+    }
+    
+  }
+  
   this.init();
   
 }
@@ -256,15 +281,6 @@ function initspi() {
   soc = new spi.Spi('/dev/spidev0.0', {'chipSelect': spi.CS['none'], 'mode': spi.MODE['MODE_2'], 'maxSpeed': 1000000, 'bitOrder': false}, function(s){s.open();});
   
   console.info("SPI interface loaded.");
-
-  setInterval(function() {
-    soc.transfer(new Buffer([ 0x00 ]), new Buffer([ 0x00 ]), function(dev, buf) {
-      setTimeout(function() {
-        soc.transfer(new Buffer([ 0x42 ]), new Buffer([ 0x00 ]), function(dev, buf) {
-        });
-      }, 500);
-    });
-  }, 1000);
   
 }
 
