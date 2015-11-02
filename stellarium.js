@@ -1,5 +1,8 @@
 /* This file is an adaptation of 
-      https://github.com/fcsonline/node-telescope-server/blob/master/servers/stellarium.js */
+      https://github.com/fcsonline/node-telescope-server/blob/master/servers/stellarium.js
+
+    The LICENSE is not applicable to this file. This file is licensed under the same LICENSE as the fcsonline/node-telescope-server project.
+*/
 
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
