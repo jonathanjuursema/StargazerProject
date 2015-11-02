@@ -17,7 +17,7 @@
     	<div class="navbar-fixed">
 			<nav class="blue-grey darken-4">
 				<div class="nav-wrapper">
-				  <a href="#" class="brand-logo"><img src="/img/logo.svg" alt="/img/logo.png"></a>
+				  <a href="#" class="brand-logo center	"><img class="center" src="/img/logo.svg" alt="/img/logo.png"></a>
 				  <ul id="nav-mobile" class="right hide-on-med-and-down">
 				  	<!--
 				    <li><a href="sass.html">Sass</a></li>
@@ -51,9 +51,16 @@
 		    <div class="message-queue hidden"></div>
 			
 			<div class="row button-row">
-		    	<div class="col s12 m8 offset-m2">
-		    		<a class="waves-effect waves-light btn-large red darken-4 trackISS"><i class="material-icons left">my_location</i>Track ISS</a>
+		    	<div class="center col s12 m8 offset-m2">
 		    		<a class="waves-effect waves-light btn-large light-blue darken-2 sendLoc"><i class="material-icons left">location_on</i>Send Location</a>
+		    		<a class="waves-effect waves-light btn-large light-blue darken-2 calibrate"><i class="material-icons left">open_with</i>Calibrate</a>
+		    	</div>
+		    </div>
+			
+			<div class="row button-row">
+		    	<div class="center col s12 m8 offset-m2">
+		    		<a class="waves-effect waves-light btn-large red darken-4 trackISS"><i class="material-icons left">my_location</i>Track ISS</a>
+		    		<a class="waves-effect waves-light btn-large red darken-4 power-button m2"><i class="material-icons left">power_settings_new</i>Turn Off</a>
 		    	</div>
 		    </div>
 
@@ -69,9 +76,7 @@
               <div class="col l4 offset-l2 s12">
                 <h5 class="white-text">Links</h5>
                 <ul>
-                  <li><a class="grey-text text-lighten-3" href="#!">About</a></li>
-                  <li><a class="grey-text text-lighten-3" href="#!">Contact</a></li>
-                  <li><a class="grey-text text-lighten-3" href="#!">License</a></li>
+                  <li><a class="grey-text text-lighten-3" href="https://github.com/jonathanjuursema/StargazerServer/blob/master/LICENSE">License</a></li>
                   <li><a class="grey-text text-lighten-3" href="http://www.stellarium.org/" target="blank">Stellarium&copy;</a></li>
                 </ul>
               </div>
@@ -95,3 +100,7 @@
 		<script type="text/javascript" src="/js/main.js"></script>
     </body>
 </html>
+
+// on/off button -> default off		(on(2) / off(0) emit (server mode))
+// button align center
+// Calibrate button 				(calibrate emit)
