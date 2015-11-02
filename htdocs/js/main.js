@@ -133,7 +133,7 @@ socket.on('connect', function() {
 	$('.err-msg').remove();
 });
 
-setocket.on('message', function(data) {
+socket.on('message', function(data) {
 	console.log(data.text);
 	//spawnMessagePanel(data.text, 'blue');
 });
