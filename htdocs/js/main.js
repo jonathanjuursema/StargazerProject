@@ -6,15 +6,7 @@ $(document).ready(function() {
 	$('.button-row').hide(0);
 	spawnDisconnectedMessage('Connecting to server...', 'blue');
 
-	// Set initial color
-	var $issbutton = $('a.trackISS');
-	$issbutton.removeClass('red');
-	$issbutton.removeClass('green');
-	if (mode == 1) {
-		$issbutton.addClass('green');
-	} else {
-		$issbutton.addClass('red');
-	}
+	setMode($('.trackISS'), mode);
 
 	// Hide message
 	$('.mesg-panel').hide();
@@ -31,22 +23,40 @@ $('.trackISS').click(function(event) {
 	(mode == 1)? mode = 2 : mode = 1;
 	console.log("Setting mode to: " + mode);
 
-	// toggle colors between red and green
-	if (mode == 1) {
-		$(this).removeClass('red');
-		$(this).addClass('green');
-		// Send gui message
-		spawnMessagePanel('Now tracking ISS', 'green');
-	} else {
-		$(this).removeClass('green');
-		$(this).addClass('red');
-		// Send gui message
-		spawnMessagePanel('Now using Stellarium', 'green');
-	}
+	setMode(this, mode);
 
 	// Send socket
 	socket.emit('setmode', {mode: mode});
 });
+
+$('.calibrate').click(function(event) {
+	socket.emit('calibrate');
+	spawnMessagePanel('Calibrating...', 'blue');
+});
+
+$('.power-button').click(function(event) {
+	// Sets the mode of the stargazer turret to zero
+	mode = 0;
+	socket.emit('setmode', {mode: mode});
+	spawnMessagePanel('Shutting down Stargazer...', 'red');
+});
+
+function setMode(element, mode) {
+	// toggle colors between red and green
+	if (mode == 1) {
+		$(element).removeClass('red');
+		$(element).addClass('light-green');
+		$(element).html('<i class="material-icons left">my_location</i>track ISS');
+		// Send gui message
+		spawnMessagePanel('Now tracking ISS', 'green');
+	} else {
+		$(element).removeClass('light-green');
+		$(element).addClass('red');
+		$(element).html('<i class="material-icons left">my_location</i>using stellarium');
+		// Send gui message
+		spawnMessagePanel('Now using Stellarium', 'green');
+	}
+}
 
 // Asks the browser for a location
 function getLocation() {
@@ -123,12 +133,14 @@ socket.on('connect', function() {
 	$('.err-msg').remove();
 });
 
-socket.on('message', function(data) {
+setocket.on('message', function(data) {
 	console.log(data.text);
 	//spawnMessagePanel(data.text, 'blue');
 });
 
-socket.on('init', function(/* ?? */) {
+socket.on('init', function(data) {
+	mode = data.mode;
+	setMode(mode);
 	// Activate button row
 	console.log("Server connected.");
 	spawnMessagePanel('Server connected...', 'green');
