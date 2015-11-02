@@ -57,20 +57,7 @@ function Server(params) {
         if (!params.quiet) {
           console.log("Connection with Stellarium closed!");
         }
-
-        clearInterval(interval);
       });
-
-      // Notify Stellarium the current position, each 500ms
-      interval = setInterval(function () {
-        if (!params.quiet) {
-          console.log("Sending position: " + utils.printRaDec(current_position));
-        }
-
-        if (socket.writable) {
-          socket.write(self.write(current_position, desired_position));
-        }
-      }, 500);
 
     }).listen(params.port);
 
@@ -124,7 +111,7 @@ function Server(params) {
     };
   };
 
-  this.write = function (current_position, desired_position) {
+  this.write = function (position) {
 
     var obuffer = new ExponentialBuffer(24)
       , time = microtime.now()
@@ -134,68 +121,17 @@ function Server(params) {
       , dec
       , dec_int;
 
-    if (params.debug) {
-      console.log("1CP-X:", current_position.x);
-      console.log("1CP-Y:", current_position.y);
-      console.log("1CP-Z:", current_position.z);
-    }
+    ra  = position.ra;
+    dec = position.dec;
 
-    current_position.x = 3 * current_position.x + desired_position.x;
-    current_position.y = 3 * current_position.y + desired_position.y;
-    current_position.z = 3 * current_position.z + desired_position.z;
-
-    if (params.debug) {
-      console.log("2CP-X:", current_position.x);
-      console.log("2CP-Y:", current_position.y);
-      console.log("2CP-Z:", current_position.z);
-    }
-
-    h = current_position.x * current_position.x
-      + current_position.y * current_position.y
-      + current_position.z * current_position.z;
-
-    if (params.debug) {
-      console.log("   H:", h);
-    }
-
-    if (h > 0.0) {
-      h = 1.0 / Math.sqrt(h);
-      current_position.x *= h;
-      current_position.y *= h;
-      current_position.z *= h;
-    } else {
-      current_position.x = desired_position.x;
-      current_position.y = desired_position.y;
-      current_position.z = desired_position.z;
-    }
-
-    if (params.debug) {
-      console.log("CP-X:", current_position.x);
-      console.log("CP-Y:", current_position.y);
-      console.log("CP-Z:", current_position.z);
-    }
-
-    ra  = Math.atan2(current_position.y, current_position.x);
-    dec = Math.atan2(current_position.z, Math.sqrt(current_position.x * current_position.x + current_position.y * current_position.y));
-
-    if (params.debug) {
-      console.log(" RA :", ra);
-      console.log(" DEC:", dec);
-    }
-
-    current_position.ra_int = Math.abs(Math.floor(0.5 + ra * (0x80000000 / Math.PI)));
-    current_position.dec_int = Math.floor(0.5 + dec * (0x80000000 / Math.PI));
-
-    if (params.debug) {
-      console.log(" RA-I :", current_position.ra_int);
-      console.log(" DEC-I:", current_position.dec_int);
-    }
+    ra_int = Math.abs(Math.floor(0.5 + ra * (0x80000000 / Math.PI)));
+    dec_int = Math.floor(0.5 + dec * (0x80000000 / Math.PI));
 
     obuffer.writeUInt16LE(obuffer.length, 0);
     obuffer.writeUInt16LE(0, 2);
     obuffer.writeDoubleExponential(time, 4);
-    obuffer.writeUInt32LE(current_position.ra_int, 12);
-    obuffer.writeInt32LE(current_position.dec_int, 16);
+    obuffer.writeUInt32LE(ra_int, 12);
+    obuffer.writeInt32LE(dec_int, 16);
     obuffer.writeUInt32LE(0, 20);
 
     if (params.debug) {
