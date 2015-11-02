@@ -6,6 +6,7 @@ var socketio = require('socket.io')(http);
 var spi;
 var stellariumservermodule = require('./stellarium.js');
 
+// Usefull functions 
 Number.prototype.mod = function(n) {
     return ((this%n)+n)%n;
 };
@@ -15,6 +16,15 @@ Number.prototype.torad = function() {
 Number.prototype.todeg = function() {
     return this * 180 / Math.PI;
 };
+
+var flagset = function(flag) {  
+  for (i = 0; i < process.argv.length; i++) {
+    if (process.argv[i] == "--"+flag) {
+      return true;
+    }
+  }
+  return false;
+}
 
 /* Starting core server. */
 
@@ -174,18 +184,21 @@ var coreserver = function() {
       
       var d = new Date();
       
+      /* Everything is multiplied by 2^17 to make casting on the FPGA much easier*/
       s.sendsoc( startword );
-      s.sendsoc( Math.round(s.location.lat * 1000000) );
-      s.sendsoc( Math.round(s.location.lon * 1000000) );
-      s.sendsoc( Math.round(s.target.ra * 1000000) );
-      s.sendsoc( Math.round(s.target.dec * 1000000) );
-      s.sendsoc( Math.round(s.getj2000date() * 10000) );
-      s.sendsoc( Math.round(s.getj2000hour() * 1000000) );
+      s.sendsoc( Math.round(s.location.lat * 131072) );
+      s.sendsoc( Math.round(s.location.lon * 131072) );
+      s.sendsoc( Math.round(s.target.ra * 131072) );
+      s.sendsoc( Math.round(s.target.dec * 131072) );
+      s.sendsoc( Math.round(s.getj2000date() * 131072) );
+      s.sendsoc( Math.round(s.getj2000hour() * 131072) );
       s.sendsoc( endword );
                   
     }
     
   }
+  
+  this.debugthroughput = flagset("debugthroughput");
   
   this.sendsoc = function(data) {
     
@@ -198,6 +211,9 @@ var coreserver = function() {
             
       soc.transfer(txbuf, rxbuf, function(device, buf) {});
       
+      if (s.debugthroughput) {
+        console.log("[tx]", txbuf, "[rx]", rxbuf);
+      }
     }
     
   }
@@ -287,11 +303,9 @@ var soc = false;
 
 function initspi() {
   
-  for (i = 0; i < process.argv.length; i++) {
-    if (process.argv[i] == "--nospi") {
-      console.info("SPI interface not loaded.");
-      return;
-    }
+  if (flagset("nospi")) {
+    console.info("SPI interface not loaded on user request.");
+    return;
   }
   
   spi = require('spi');
