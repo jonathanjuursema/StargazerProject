@@ -16,6 +16,9 @@ Number.prototype.torad = function() {
 Number.prototype.todeg = function() {
     return this * 180 / Math.PI;
 };
+Number.prototype.hr = function() {
+    return this.toFixed(3);
+};
 
 var flagset = function(flag) {  
   for (i = 0; i < process.argv.length; i++) {
@@ -40,6 +43,8 @@ var coreserver = function() {
   var servermode;  
   // Tracking target. Is only used when mode=2, but can be set when another mode is active.
   var target;
+  // Current turret direction.
+  var direction;
   // Server GPS location.
   var location;
   // ISS location.
@@ -51,6 +56,7 @@ var coreserver = function() {
   this.init = function() {
     s.servermode = 0;
     s.target = {'ra':0.0,'dec':0.0};
+    s.direction = {'ra':0.0,'dec':0.0};
     s.location = {'lat':0.0,'lon':0.0};
     s.isslocation = {'lat':0.0,'lon':0.0};
     setInterval(s.bursttosoc, 1000);
@@ -97,10 +103,10 @@ var coreserver = function() {
       console.warn("New target coordinates ["+newcoordinates.ra+", "+newcoordinates.dec+"] are not valid. Keeping old ones.");
       return false;
     }
-    
+        
     s.target.ra = newcoordinates.ra; s.target.dec = newcoordinates.dec;
-    console.info("New target set to [RA "+s.target.ra+" hrs, DEC "+s.target.dec+" deg].");
-    sendgui('message',{'text': 'A new target has been selected on the following celestial coordinates: RA '+s.target.ra+', DEC '+s.target.dec+'.'});
+    console.info("New target set to [RA "+s.target.ra.hr()+" hrs, DEC "+s.target.dec.hr()+" deg].");
+    sendgui('message',{'text': 'A new target has been selected on the following celestial coordinates: RA '+s.target.ra.hr()+', DEC '+s.target.dec.hr()+'.'});
         
     return true;
   }
@@ -113,8 +119,8 @@ var coreserver = function() {
     }
     
     s.location.lat = newlocation.lat; s.location.lon = newlocation.lon;
-    console.info("New location set to [LAT "+s.location.lat+" deg, LON "+s.location.lon+" deg].");
-    sendgui('message',{'text': "New server location has been set to ["+s.location.lat+", "+s.location.lon+"]."});
+    console.info("New location set to [LAT "+s.location.lat.hr()+" deg, LON "+s.location.lon.hr()+" deg].");
+    sendgui('message',{'text': "New server location has been set to ["+s.location.lat.hr()+", "+s.location.lon.hr()+"]."});
     return true;
   }
   
@@ -145,12 +151,6 @@ var coreserver = function() {
   this.calculatesphericalcoordinates = function(coordinates) {
     
     var spherical = { 'ra':coordinates.ra, 'dec':coordinates.dec }
-    
-    if (s.location.lat == 0 && s.location.lon == 0) {
-      console.warn("No GPS coordinates known. Could not calculate spherical coordinates from celestial coordinates.");
-      sendgui('message',{'text': "Stellarium tracking is activated, but no GPS coordinates are known. Please send your GPS location."});
-      return false;
-    }
     
     var d = new Date();
     
@@ -200,7 +200,7 @@ var coreserver = function() {
       
       if (s.debugvalues) {
         var t = s.target, c = s.calculatesphericalcoordinates(t);
-        console.log("Celestial coordinates [RA "+s.target.ra+", DEC "+s.target.dec+"] should translate to spherical coordinates [ALT "+c.alt+", AZ "+c.az+"].")
+        console.log("Celestial coordinates [RA "+s.target.ra.hr()+", DEC "+s.target.dec.hr()+"] should translate to spherical coordinates [ALT "+c.alt.hr()+", AZ "+c.az.hr()+"].")
       }
                   
     }
@@ -221,7 +221,9 @@ var coreserver = function() {
       soc.transfer(txbuf, rxbuf, function(device, buf) {});
       
       if (s.debugthroughput) {
-        console.log("[tx]", txbuf, "[rx]", rxbuf);
+        console.log("[tx]", txbuf, "[parsed]", (txbuf.readInt32BE(0) / 131072).hr())
+        console.log("[rx]", rxbuf, "[parsed]", (rxbuf.readInt32BE(0) / 131072).hr());
+        console.log();
       }
     }
     
@@ -242,12 +244,10 @@ var stellariumserver = function(params) {
   stellariumserverinstance.on('goto', function (position) {
     server.settarget(position);
   });
-
-  /* This is going to be used to handle the feedback from the gimble, sending current direction vector back to Stellarium.
-  laser.on('track', function (position) {
-    stellariumserverinstance.track(position);
-  });
-  */
+  
+  var interval = setInterval(function() {
+    stellariumserverinstance.write(server.direction);
+  }, 500);
 
   stellariumserverinstance.listen();
 
