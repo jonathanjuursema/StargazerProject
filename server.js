@@ -53,7 +53,7 @@ var coreserver = function() {
     s.target = {'ra':0.0,'dec':0.0};
     s.location = {'lat':0.0,'lon':0.0};
     s.isslocation = {'lat':0.0,'lon':0.0};
-    setInterval(s.bursttosoc, 100);
+    setInterval(s.bursttosoc, 1000);
   }
   
   // Listener
@@ -113,7 +113,7 @@ var coreserver = function() {
     }
     
     s.location.lat = newlocation.lat; s.location.lon = newlocation.lon;
-    console.info("New locaiton set to [LAT "+s.location.lat+" deg, LON "+s.location.lon+" deg].");
+    console.info("New location set to [LAT "+s.location.lat+" deg, LON "+s.location.lon+" deg].");
     sendgui('message',{'text': "New server location has been set to ["+s.location.lat+", "+s.location.lon+"]."});
     return true;
   }
@@ -144,6 +144,8 @@ var coreserver = function() {
   
   this.calculatesphericalcoordinates = function(coordinates) {
     
+    var spherical = { 'ra':coordinates.ra, 'dec':coordinates.dec }
+    
     if (s.location.lat == 0 && s.location.lon == 0) {
       console.warn("No GPS coordinates known. Could not calculate spherical coordinates from celestial coordinates.");
       sendgui('message',{'text': "Stellarium tracking is activated, but no GPS coordinates are known. Please send your GPS location."});
@@ -153,27 +155,29 @@ var coreserver = function() {
     var d = new Date();
     
     // calculation comes from http://www.stargazing.net/kepler/altaz.html
-    coordinates.ra = coordinates.ra * (360/24); // convert from hours to degrees
-    coordinates.lst = ( 100.46 + 0.985647 * s.getj2000date() + s.location.lon + ( 15 * s.getj2000hour() ) ); // get local siderial time (see site)
-    coordinates.lst = coordinates.lst.mod(360);
-    coordinates.ha = ( coordinates.lst - coordinates.ra ); // get hour angle
-    coordinates.ha = coordinates.ha.mod(360);
+    spherical.ra = spherical.ra * (360/24); // convert from hours to degrees
+    spherical.lst = ( 100.46 + 0.985647 * s.getj2000date() + s.location.lon + ( 15 * s.getj2000hour() ) ); // get local siderial time (see site)
+    spherical.lst = spherical.lst.mod(360);
+    spherical.ha = ( spherical.lst - spherical.ra ); // get hour angle
+    spherical.ha = spherical.ha.mod(360);
     
-    coordinates.sinalt = Math.sin(coordinates.dec.torad()) * Math.sin(s.location.lat.torad()) + Math.cos(coordinates.dec.torad()) * Math.cos(s.location.lat.torad()) * Math.cos(coordinates.ha.torad());
-    coordinates.alt = Math.asin(coordinates.sinalt);
-    coordinates.cosaz = ( Math.sin(coordinates.dec.torad()) - Math.sin(coordinates.alt) * Math.sin(s.location.lat.torad()) ) / ( Math.cos(coordinates.alt) * Math.cos(s.location.lat.torad()) );
-    coordinates.az = Math.acos(coordinates.cosaz);
+    spherical.sinalt = Math.sin(spherical.dec.torad()) * Math.sin(s.location.lat.torad()) + Math.cos(spherical.dec.torad()) * Math.cos(s.location.lat.torad()) * Math.cos(spherical.ha.torad());
+    spherical.alt = Math.asin(spherical.sinalt);
+    spherical.cosaz = ( Math.sin(spherical.dec.torad()) - Math.sin(spherical.alt) * Math.sin(s.location.lat.torad()) ) / ( Math.cos(spherical.alt) * Math.cos(s.location.lat.torad()) );
+    spherical.az = Math.acos(spherical.cosaz);
     
-    coordinates.alt = coordinates.alt.todeg();
-    if (Math.sin(coordinates.ha.torad()) >= 0) {
-      coordinates.az = 360 - coordinates.az.todeg();
+    spherical.alt = spherical.alt.todeg();
+    if (Math.sin(spherical.ha.torad()) >= 0) {
+      spherical.az = 360 - spherical.az.todeg();
     } else {
-      coordinates.az = coordinates.az.todeg();
+      spherical.az = spherical.az.todeg();
     }
     
-    return coordinates;
+    return spherical;
     
   }
+  
+  this.debugvalues = flagset("debugvalues");
     
   this.bursttosoc = function() {
   
@@ -193,6 +197,11 @@ var coreserver = function() {
       s.sendsoc( Math.round(s.getj2000date() * 131072) );
       s.sendsoc( Math.round(s.getj2000hour() * 131072) );
       s.sendsoc( endword );
+      
+      if (s.debugvalues) {
+        var t = s.target, c = s.calculatesphericalcoordinates(t);
+        console.log("Celestial coordinates [RA "+s.target.ra+", DEC "+s.target.dec+"] should translate to spherical coordinates [ALT "+c.alt+", AZ "+c.az+"].")
+      }
                   
     }
     
