@@ -283,6 +283,10 @@ socketio.on('connection', function(socket) {
     server.setlocation(data);
   });
   
+  socket.on('calibrate', function(data) {
+    server.settarget({'ra':0,'dec':0});
+  });
+  
   socket.on('disconnect', function() {
     console.info("Client "+socket.handshake.address+" disconnected.");
     socket.emit('message', {'text':'Disconnecting...'});
