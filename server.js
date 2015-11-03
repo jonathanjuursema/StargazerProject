@@ -205,7 +205,7 @@ var coreserver = function() {
         s.sendsoc( endword );
       } else if (s.servermode == 1) {
         s.sendsoc( startword );
-        s.sendsoc( Math.round((s.iss.alt + 180) * 131072) );
+        s.sendsoc( Math.round(s.iss.alt * 131072) );
         s.sendsoc( Math.round(s.iss.az * 131072) );
         s.sendsoc( endword );
       } else if (s.servermode == 2) {
@@ -345,7 +345,7 @@ setInterval(function() {
     exec("python ./iss.py --lat="+server.location.lat+" --lon="+server.location.lon+" --alt", parsealt);
     
     function parsealt(error, stdout, stderr) {
-      server.iss.alt = stdout;
+      server.iss.alt = (stdout*1)+180;
     }
     
     exec("python ./iss.py --lat="+server.location.lat+" --lon="+server.location.lon+" --az", parseaz);
