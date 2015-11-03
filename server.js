@@ -7,6 +7,8 @@ var spi;
 var stellariumservermodule = require('./stellarium.js');
 var sys = require('sys')
 var exec = require('child_process').exec;
+var httpalt = require('http');
+var fs = require('fs');
 
 // Usefull functions 
 Number.prototype.mod = function(n) {
@@ -82,6 +84,7 @@ var coreserver = function() {
         console.info("Server switching mode from "+s.servermode+" to "+newmode+".");
         sendgui('setmode',{'mode':1,'text':'Mode changed to track ISS.'});
         s.servermode = 1;
+        readtelemetry();
         return true;
       
       case 2:
@@ -299,10 +302,6 @@ socketio.on('connection', function(socket) {
     server.setlocation(data);
   });
   
-  socket.on('calibrate', function(data) {
-    server.settarget({'ra':0,'dec':0});
-  });
-  
   socket.on('disconnect', function() {
     console.info("Client "+socket.handshake.address+" disconnected.");
     socket.emit('message', {'text':'Disconnecting...'});
@@ -357,3 +356,16 @@ setInterval(function() {
 
   }
 }, 1000);
+
+// Read new telemetry data every minute
+setInterval(readtelemetry, 60000);
+
+var readtelemetry = function() {
+  if (server.servermode == 1) {
+    var file = fs.createWriteStream("satellites.dat");
+    var request = httpalt.get("http://www.celestrak.com/NORAD/elements/stations.txt", function(response) {
+      response.pipe(file);
+    });
+    console.log("Read telemetry data for satellites.");
+  }
+}

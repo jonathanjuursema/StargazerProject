@@ -31,13 +31,14 @@ def main(argv):
       r = "alt"
     elif opt == "--az":
       r = "az"
+  
+  with open('./satellites.dat') as f:
+    teldata = f.read().splitlines()
 
-  # Always get the latest ISS TLE data from:
-  # http://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html
   iss = ephem.readtle(
-    'ISS',
-    '1 25544U 98067A   15303.55507763  .00016717  00000-0  10270-3 0  9007',
-    '2 25544  51.6383 128.4698 0006236  89.1591 271.0276 15.54697518  9102'
+    teldata[0],
+    teldata[1],
+    teldata[2]
   )
 
   home.date = datetime.utcnow()
