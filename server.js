@@ -154,6 +154,12 @@ var coreserver = function() {
     
     var spherical = { 'ra':coordinates.ra, 'dec':coordinates.dec }
     
+    if (s.location.lat == 0.0 && s.location.lon == 0.0) {
+      spherical.alt = 0.0;
+      spherical.az = 0.0;
+      return spherical;
+    }
+    
     var d = new Date();
     
     // calculation comes from http://www.stargazing.net/kepler/altaz.html
@@ -189,15 +195,22 @@ var coreserver = function() {
       var c = s.calculatesphericalcoordinates(s.target);
       
       /* Everything is multiplied by 2^17 to make casting on the FPGA much easier*/
-      s.sendsoc( startword );
-      if (s.mode == 1) {
-        s.sendsoc( Math.round(iss.alt * 131072) );
-        s.sendsoc( Math.round(iss.az * 131072) );
-      } else if (s.mode == 2) {
+      if (s.servermode == 0) {
+        s.sendsoc( startword );
+        s.sendsoc( Math.round(0.0 * 131072) );
+        s.sendsoc( Math.round(0.0 * 131072) );
+        s.sendsoc( endword );
+      } else if (s.servermode == 1) {
+        s.sendsoc( startword );
+        s.sendsoc( Math.round(s.iss.alt * 131072) );
+        s.sendsoc( Math.round(s.iss.az * 131072) );
+        s.sendsoc( endword );
+      } else if (s.servermode == 2) {
+        s.sendsoc( startword );
         s.sendsoc( Math.round(c.alt * 131072) );
         s.sendsoc( Math.round(c.az * 131072) );
+        s.sendsoc( endword );
       }
-      s.sendsoc( endword );
                   
     }
     
@@ -217,9 +230,7 @@ var coreserver = function() {
       soc.transfer(txbuf, rxbuf, function(device, buf) {});
       
       if (s.debugthroughput) {
-        console.log("[tx]", txbuf, "[parsed]", (txbuf.readInt32BE(0) / 131072).hr())
-        console.log("[rx]", rxbuf, "[parsed]", (rxbuf.readInt32BE(0) / 131072).hr());
-        console.log();
+        console.log("[tx]", txbuf, "[rx]", rxbuf, "[parsed]", (txbuf.readInt32BE(0) / 131072).hr(), " | ", (rxbuf.readInt32BE(0) / 131072).hr())
       }
     }
     
