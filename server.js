@@ -5,6 +5,8 @@ var http = require('http').Server(app);
 var socketio = require('socket.io')(http);
 var spi;
 var stellariumservermodule = require('./stellarium.js');
+var sys = require('sys')
+var exec = require('child_process').exec;
 
 // Usefull functions 
 Number.prototype.mod = function(n) {
@@ -48,7 +50,7 @@ var coreserver = function() {
   // Server GPS location.
   var location;
   // ISS location.
-  var isslocation;
+  var iss;
     
   /* Main functions */
   
@@ -58,7 +60,7 @@ var coreserver = function() {
     s.target = {'ra':0.0,'dec':0.0};
     s.direction = {'ra':0.0,'dec':0.0};
     s.location = {'lat':0.0,'lon':0.0};
-    s.isslocation = {'lat':0.0,'lon':0.0};
+    s.iss = {'alt':0.0,'az':0.0};
     setInterval(s.bursttosoc, 1000);
   }
   
@@ -176,9 +178,7 @@ var coreserver = function() {
     return spherical;
     
   }
-  
-  this.debugvalues = flagset("debugvalues");
-    
+      
   this.bursttosoc = function() {
   
     if (soc !== false) {
@@ -186,22 +186,18 @@ var coreserver = function() {
       var startword = 0x7FFFFFFE; // arbitrarily chosen, but out of the reach of the data: (+360 deg, 0x15752A00; -360 deg, 0xEA8AD600)
       var endword = 0x7FFFFFFF;
       
-      var d = new Date();
+      var c = s.calculatesphericalcoordinates(s.target);
       
       /* Everything is multiplied by 2^17 to make casting on the FPGA much easier*/
       s.sendsoc( startword );
-      s.sendsoc( Math.round(s.location.lat * 131072) );
-      s.sendsoc( Math.round(s.location.lon * 131072) );
-      s.sendsoc( Math.round(s.target.ra * 131072) );
-      s.sendsoc( Math.round(s.target.dec * 131072) );
-      s.sendsoc( Math.round(s.getj2000date() * 131072) );
-      s.sendsoc( Math.round(s.getj2000hour() * 131072) );
-      s.sendsoc( endword );
-      
-      if (s.debugvalues) {
-        var t = s.target, c = s.calculatesphericalcoordinates(t);
-        console.log("Celestial coordinates [RA "+s.target.ra.hr()+", DEC "+s.target.dec.hr()+"] should translate to spherical coordinates [ALT "+c.alt.hr()+", AZ "+c.az.hr()+"].")
+      if (s.mode == 1) {
+        s.sendsoc( Math.round(iss.alt * 131072) );
+        s.sendsoc( Math.round(iss.az * 131072) );
+      } else if (s.mode == 2) {
+        s.sendsoc( Math.round(c.alt * 131072) );
+        s.sendsoc( Math.round(c.az * 131072) );
       }
+      s.sendsoc( endword );
                   
     }
     
@@ -335,22 +331,18 @@ initspi();
 
 setInterval(function() {
   if (server.servermode == 1) {
-    require('http').get("http://api.open-notify.org/iss-now.json", function(res){
-      var body = '';
+    
+    exec("python ./iss.py --lat="+server.location.lat+" --lon="+server.location.lon+" --alt", parsealt);
+    
+    function parsealt(error, stdout, stderr) {
+      server.iss.alt = stdout;
+    }
+    
+    exec("python ./iss.py --lat="+server.location.lat+" --lon="+server.location.lon+" --az", parseaz);
+    
+    function parseaz(error, stdout, stderr) {
+      server.iss.az = stdout;
+    }
 
-      res.on('data', function(chunk){
-          body += chunk;
-      });
-
-      res.on('end', function(){
-          var response = JSON.parse(body);
-          console.log("Got these GPS coordinates: ", response.iss_position);
-          server.isslocation.lat = response.iss_position.latitude;
-          server.isslocation.lon = response.iss_position.longitude;
-          
-      });
-    }).on('error', function(e){
-          console.warn("Got an error during scraping of ISS location: ", e);
-    });
   }
 }, 1000);
