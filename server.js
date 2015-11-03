@@ -357,9 +357,6 @@ setInterval(function() {
   }
 }, 1000);
 
-// Read new telemetry data every minute
-setInterval(readtelemetry, 60000);
-
 var readtelemetry = function() {
   if (server.servermode == 1) {
     var file = fs.createWriteStream("satellites.dat");
@@ -369,3 +366,6 @@ var readtelemetry = function() {
     console.log("Read telemetry data for satellites.");
   }
 }
+
+// Read new telemetry data every minute
+setInterval(readtelemetry, 60000);
