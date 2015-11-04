@@ -41,7 +41,7 @@ function setMode(mode) {
 
 	$.each(classes, function(i, v) {
 		$('.stellarium').removeClass(v);
-		$('#dropdown').removeClass(v);
+		$('.setsat').removeClass(v);
 		$('.power-button').removeClass(v);
 	});
 
