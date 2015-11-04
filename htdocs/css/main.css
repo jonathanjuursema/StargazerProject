@@ -3,6 +3,7 @@ body {
 	min-height: 100vh;
 	flex-direction: column;
 
+	background-color: #111118;
 	background-image: url('/img/stargaze_background.jpg');
 	background-position: center;
 	background-size: cover;
@@ -19,4 +20,8 @@ main {
 
 .header-text {
 	margin: 0;
+}
+
+.dropdown-content.active {
+	background-color: white !important;
 }

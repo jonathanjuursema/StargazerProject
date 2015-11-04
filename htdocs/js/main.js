@@ -8,6 +8,21 @@ $(document).ready(function() {
 
 	// Hide message
 	$('.mesg-panel').hide();
+
+	var classes = ['Satalite A', 'Satalite B' , 'Satalite C', 'ISS'];
+
+
+	$.each(classes, function(i, v) {
+		var link = '#!';
+		$('#dropdown').append('<li><a href="' + link + '" class="' + 'iss' + '">' + v + '</a></li>');
+	});
+
+	$('.iss').click(function(event) {
+		setMode(1);
+		// Get setalite
+		var setalite = 'iss';
+		socket.emit('setsetalite', satalite);
+	});
 });
 
 // Buttons
@@ -15,15 +30,22 @@ $('.sendLoc').click(function(event) {
 	getLocation();
 });
 
-$('.iss').click(function(event) {
-	setMode(1);
-});
 $('.stellarium').click(function(event){
 	setMode(2);
 });
 
 $('.power-button').click(function(event) {
 	setMode(0);
+});
+
+$('.dropdown-button').dropdown({
+	inDuration: 300,
+	outDuration: 225,
+	constrain_width: false, // Does not change width of dropdown to that of the activator
+	hover: false, // Activate on hover
+	gutter: 0, // Spacing from edge
+	belowOrigin: false, // Displays dropdown below the button
+	alignment: 'left' // Displays dropdown with edge aligned to the left of button
 });
 
 function setMode(mode) {
@@ -34,7 +56,7 @@ function setMode(mode) {
 
 	$.each(classes, function(i, v) {
 		$('.stellarium').removeClass(v);
-		$('.iss').removeClass(v);
+		$('#dropdown').removeClass(v);
 		$('.power-button').removeClass(v);
 	});
 
@@ -43,19 +65,19 @@ function setMode(mode) {
 		case 0:
 			$('.power-button').addClass('red');
 			$('.stellarium').addClass('blue');
-			$('.iss').addClass('blue');
+			$('#dropdown').addClass('blue');
 			spawnMessagePanel('Now standing by', 'green');
 		break;
 		case 1:
 			$('.power-button').addClass('blue');
 			$('.stellarium').addClass('blue');
-			$('.iss').addClass('green');
+			$('#dropdown').addClass('green');
 			spawnMessagePanel('Now using Stellarium', 'green');
 		break;
 		case 2:
 			$('.power-button').addClass('blue');
 			$('.stellarium').addClass('green');
-			$('.iss').addClass('blue');
+			$('#dropdown').addClass('blue');
 			spawnMessagePanel('Now tracking ISS', 'green');
 		break;
 		default:
@@ -143,13 +165,11 @@ socket.on('connect', function() {
 
 socket.on('message', function(data) {
 	console.log(data.text);
-	//spawnMessagePanel(data.text, 'blue');
 });
 
 socket.on('init', function(data) {
 	mode = data.mode;
 	setMode(mode);
-	// Activate button row
 	console.log("Server connected.");
 	spawnMessagePanel('Server connected...', 'green');
 	$('.button-row').show(500);
@@ -162,4 +182,9 @@ socket.on('setmode', function(data) {
 	// 2 stellarium
 	// get the mode that it would have been if error
 	console.log("Mode set to: " + data.mode);
+});
+
+socket.on('satalites', function(data) {
+	// Array of satalites
+	console.log(data);
 });
