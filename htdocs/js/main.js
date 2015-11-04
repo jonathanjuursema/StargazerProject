@@ -8,21 +8,6 @@ $(document).ready(function() {
 
 	// Hide message
 	$('.mesg-panel').hide();
-
-	var classes = ['Satalite A', 'Satalite B' , 'Satalite C', 'ISS'];
-
-
-	$.each(classes, function(i, v) {
-		var link = '#!';
-		$('#dropdown').append('<li><a href="' + link + '" class="' + 'iss' + '">' + v + '</a></li>');
-	});
-
-	$('.iss').click(function(event) {
-		setMode(1);
-		// Get setalite
-		var setalite = 'iss';
-		socket.emit('setsetalite', satalite);
-	});
 });
 
 // Buttons
@@ -46,6 +31,9 @@ $('.dropdown-button').dropdown({
 	gutter: 0, // Spacing from edge
 	belowOrigin: false, // Displays dropdown below the button
 	alignment: 'left' // Displays dropdown with edge aligned to the left of button
+});
+$('.dropdown-button').click(function(event) {
+	setMode(1);
 });
 
 function setMode(mode) {
@@ -72,13 +60,13 @@ function setMode(mode) {
 			$('.power-button').addClass('blue');
 			$('.stellarium').addClass('blue');
 			$('#dropdown').addClass('green');
-			spawnMessagePanel('Now using Stellarium', 'green');
+			spawnMessagePanel('Now tracking satellite', 'green');
 		break;
 		case 2:
 			$('.power-button').addClass('blue');
 			$('.stellarium').addClass('green');
 			$('#dropdown').addClass('blue');
-			spawnMessagePanel('Now tracking ISS', 'green');
+			spawnMessagePanel('Now using Stellarium', 'green');
 		break;
 		default:
 			// Error?
@@ -154,6 +142,21 @@ function spawnDisconnectedMessage(message, color) {
 	$('.mesg-panel').hide().slideDown(300);
 }
 
+function setDropdown(data) {
+	$('#dropdown').html('');
+	$.each(data, function(i, v) {
+		var link = '#!';
+		$('#dropdown').append('<li><a href="' + link + '" class="setsatellites" data-name="' + v + '">' + v + '</a></li>');
+	});
+
+	$('.setsatellites').click(function(event) {
+		// Get setalite
+		var satellite = $(this).attr('data-name');
+		spawnMessagePanel('Now tracking ' + satellite, 'green');
+		socket.emit('setsatellites', satellite);
+	});
+}
+
 socket.on('disconnect', function(err){
 	$('.button-row').hide(0);
 	spawnDisconnectedMessage('Server disconnected, trying to reconnect...', 'red');
@@ -184,7 +187,8 @@ socket.on('setmode', function(data) {
 	console.log("Mode set to: " + data.mode);
 });
 
-socket.on('satalites', function(data) {
+socket.on('satellites', function(data) {
 	// Array of satalites
-	console.log(data);
+	data = ["test1", "test2"];
+	setDropdown(data);
 });
