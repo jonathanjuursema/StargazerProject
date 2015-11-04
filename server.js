@@ -63,6 +63,7 @@ var coreserver = function() {
     s.direction = {'ra':0.0,'dec':0.0};
     s.location = {'lat':0.0,'lon':0.0};
     s.iss = {'alt':0.0,'az':0.0};
+    s.satellite = "";
     setInterval(s.bursttosoc, 1000);
   }
   
@@ -177,7 +178,7 @@ var coreserver = function() {
     spherical.cosaz = ( Math.sin(spherical.dec.torad()) - Math.sin(spherical.alt) * Math.sin(s.location.lat.torad()) ) / ( Math.cos(spherical.alt) * Math.cos(s.location.lat.torad()) );
     spherical.az = Math.acos(spherical.cosaz);
     
-    spherical.alt = spherical.alt.todeg();
+    spherical.alt = spherical.alt.todeg() + 90;
     if (Math.sin(spherical.ha.torad()) >= 0) {
       spherical.az = 360 - spherical.az.todeg();
     } else {
@@ -302,6 +303,10 @@ socketio.on('connection', function(socket) {
     server.setlocation(data);
   });
   
+  socket.on('setsatellite', function(data) {
+    server.satellite = data;
+  });
+  
   socket.on('disconnect', function() {
     console.info("Client "+socket.handshake.address+" disconnected.");
     socket.emit('message', {'text':'Disconnecting...'});
@@ -339,16 +344,25 @@ initspi();
 
 /* Fetching ISS coordinates. */
 
+var satellites;
+
 setInterval(function() {
-  if (server.servermode == 1) {
+  if (server.servermode == 1) {   
+  
+    exec("python ./sat.py --list", parselist);
     
-    exec("python ./iss.py --lat="+server.location.lat+" --lon="+server.location.lon+" --alt", parsealt);
-    
-    function parsealt(error, stdout, stderr) {
-      server.iss.alt = (stdout*1)+180;
+    function parselist(error, stdout, stderr) {
+      satellites = stdout.split(/\n/);
+      sendgui("satellites",satellites);
     }
     
-    exec("python ./iss.py --lat="+server.location.lat+" --lon="+server.location.lon+" --az", parseaz);
+    exec("python ./sat.py --lat="+server.location.lat+" --lon="+server.location.lon+" --sat="+server.satellite+" --alt", parsealt);
+    
+    function parsealt(error, stdout, stderr) {
+      server.iss.alt = (stdout*1)+90;
+    }
+    
+    exec("python ./sat.py --lat="+server.location.lat+" --lon="+server.location.lon+" --sat="+server.satellite+" --az", parseaz);
     
     function parseaz(error, stdout, stderr) {
       server.iss.az = stdout;
@@ -359,7 +373,7 @@ setInterval(function() {
 
 var readtelemetry = function() {
   if (server.servermode == 1) {
-    var file = fs.createWriteStream("satellites.dat");
+    var file = fs.createWriteStream("./satellites.dat");
     var request = httpalt.get("http://www.celestrak.com/NORAD/elements/stations.txt", function(response) {
       response.pipe(file);
     });
