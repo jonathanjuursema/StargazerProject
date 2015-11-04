@@ -64,7 +64,7 @@ var coreserver = function() {
     s.location = {'lat':0.0,'lon':0.0};
     s.iss = {'alt':0.0,'az':0.0};
     s.satellite = "";
-    setInterval(s.bursttosoc, 1000);
+    setInterval(s.bursttosoc, 100);
   }
   
   // Listener
@@ -85,7 +85,6 @@ var coreserver = function() {
         console.info("Server switching mode from "+s.servermode+" to "+newmode+".");
         sendgui('setmode',{'mode':1,'text':'Mode changed to track ISS.'});
         s.servermode = 1;
-        readtelemetry();
         return true;
       
       case 2:
