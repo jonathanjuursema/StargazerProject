@@ -367,5 +367,5 @@ var readtelemetry = function() {
   }
 }
 
-// Read new telemetry data every minute
-setInterval(readtelemetry, 60000);
+// Read new telemetry data every hour.
+setInterval(readtelemetry, 3600*1000);
