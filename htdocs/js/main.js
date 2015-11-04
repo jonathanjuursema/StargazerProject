@@ -32,9 +32,6 @@ $('.dropdown-button').dropdown({
 	belowOrigin: false, // Displays dropdown below the button
 	alignment: 'left' // Displays dropdown with edge aligned to the left of button
 });
-$('.dropdown-button').click(function(event) {
-	setMode(1);
-});
 
 function setMode(mode) {
 
@@ -53,19 +50,18 @@ function setMode(mode) {
 		case 0:
 			$('.power-button').addClass('red');
 			$('.stellarium').addClass('blue');
-			$('#dropdown').addClass('blue');
+			$('.setsat').addClass('blue');
 			spawnMessagePanel('Now standing by', 'green');
 		break;
 		case 1:
 			$('.power-button').addClass('blue');
 			$('.stellarium').addClass('blue');
-			$('#dropdown').addClass('green');
-			spawnMessagePanel('Now tracking satellite', 'green');
+			$('.setsat').addClass('green');
 		break;
 		case 2:
 			$('.power-button').addClass('blue');
 			$('.stellarium').addClass('green');
-			$('#dropdown').addClass('blue');
+			$('.setsat').addClass('blue');
 			spawnMessagePanel('Now using Stellarium', 'green');
 		break;
 		default:
@@ -153,7 +149,8 @@ function setDropdown(data) {
 		// Get setalite
 		var satellite = $(this).attr('data-name');
 		spawnMessagePanel('Now tracking ' + satellite, 'green');
-		socket.emit('setsatellites', satellite);
+		socket.emit('setsatellite', satellite);
+    setMode(1);
 	});
 }
 
@@ -189,6 +186,5 @@ socket.on('setmode', function(data) {
 
 socket.on('satellites', function(data) {
 	// Array of satalites
-	data = ["test1", "test2"];
 	setDropdown(data);
 });

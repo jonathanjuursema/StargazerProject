@@ -304,6 +304,7 @@ socketio.on('connection', function(socket) {
   });
   
   socket.on('setsatellite', function(data) {
+    console.log("Now tracking satellite "+data+".");
     server.satellite = data;
   });
   
@@ -356,13 +357,13 @@ setInterval(function() {
       sendgui("satellites",satellites);
     }
     
-    exec("python ./sat.py --lat="+server.location.lat+" --lon="+server.location.lon+" --sat="+server.satellite+" --alt", parsealt);
+    exec("python ./sat.py --lat="+server.location.lat+" --lon="+server.location.lon+" --sat=\""+server.satellite+"\" --alt", parsealt);
     
     function parsealt(error, stdout, stderr) {
       server.iss.alt = (stdout*1)+90;
     }
     
-    exec("python ./sat.py --lat="+server.location.lat+" --lon="+server.location.lon+" --sat="+server.satellite+" --az", parseaz);
+    exec("python ./sat.py --lat="+server.location.lat+" --lon="+server.location.lon+" --sat=\""+server.satellite+"\" --az", parseaz);
     
     function parseaz(error, stdout, stderr) {
       server.iss.az = stdout;
