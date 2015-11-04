@@ -6,8 +6,6 @@ $(document).ready(function() {
 	$('.button-row').hide(0);
 	spawnDisconnectedMessage('Connecting to server...', 'blue');
 
-	setMode($('.trackISS'), mode);
-
 	// Hide message
 	$('.mesg-panel').hide();
 });
@@ -17,45 +15,55 @@ $('.sendLoc').click(function(event) {
 	getLocation();
 });
 
-var mode = 0;
-$('.trackISS').click(function(event) {
-	
-	(mode == 1)? mode = 2 : mode = 1;
-	console.log("Setting mode to: " + mode);
-
-	setMode(this, mode);
-
-	// Send socket
-	socket.emit('setmode', {mode: mode});
+$('.iss').click(function(event) {
+	setMode(1);
 });
-
-$('.calibrate').click(function(event) {
-	socket.emit('calibrate');
-	spawnMessagePanel('Calibrating...', 'blue');
+$('.stellarium').click(function(event){
+	setMode(2);
 });
 
 $('.power-button').click(function(event) {
-	// Sets the mode of the stargazer turret to zero
-	mode = 0;
-	socket.emit('setmode', {mode: mode});
-	spawnMessagePanel('Shutting down Stargazer...', 'red');
+	setMode(0);
 });
 
-function setMode(element, mode) {
-	// toggle colors between red and green
-	if (mode == 1) {
-		$(element).removeClass('red');
-		$(element).addClass('light-green');
-		$(element).html('<i class="material-icons left">my_location</i>track ISS');
-		// Send gui message
-		spawnMessagePanel('Now tracking ISS', 'green');
-	} else {
-		$(element).removeClass('light-green');
-		$(element).addClass('red');
-		$(element).html('<i class="material-icons left">my_location</i>using stellarium');
-		// Send gui message
-		spawnMessagePanel('Now using Stellarium', 'green');
+function setMode(mode) {
+
+	console.log("Setting mode to: " + mode);
+
+	var classes = ['red', 'green' ,'blue'];
+
+	$.each(classes, function(i, v) {
+		$('.stellarium').removeClass(v);
+		$('.iss').removeClass(v);
+		$('.power-button').removeClass(v);
+	});
+
+	// Toggle buttons
+	switch (mode) {
+		case 0:
+			$('.power-button').addClass('red');
+			$('.stellarium').addClass('blue');
+			$('.iss').addClass('blue');
+			spawnMessagePanel('Now standing by', 'green');
+		break;
+		case 1:
+			$('.power-button').addClass('blue');
+			$('.stellarium').addClass('blue');
+			$('.iss').addClass('green');
+			spawnMessagePanel('Now using Stellarium', 'green');
+		break;
+		case 2:
+			$('.power-button').addClass('blue');
+			$('.stellarium').addClass('green');
+			$('.iss').addClass('blue');
+			spawnMessagePanel('Now tracking ISS', 'green');
+		break;
+		default:
+			// Error?
+		break;
 	}
+	// Emit socket event
+	socket.emit('setmode', {mode: mode});
 }
 
 // Asks the browser for a location

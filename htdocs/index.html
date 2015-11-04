@@ -33,63 +33,75 @@
 			<!-- Page Content goes here -->
 	
 			<div class="row">
-		      <div class="col s12 m8 offset-m2">
-		        <div class="card-panel center-align">
-		          <span class="black-text"><h1 class="header-text" style="font-weight: 900;">Welcome to Stargaze!</h1></span>
-		        </div>
-		      </div>
-		    </div>
+				<div class="col s12 m8 offset-m2">
+					<div class="card-panel center-align">
+					<span class="black-text"><h1 class="header-text" style="font-weight: 900;">Welcome to Stargaze!</h1></span>
+					</div>
+				</div>
+			</div>
 
 			<div class="row">
-		      <div class="col s12 m8 offset-m2">
-		        <div class="card-panel center-align">
-		          <span class="black-text"><p class="flow-text">This is the web interface for controlling the Stargaze star pointer. Send your position to the server controlled laser pointer and select wether to track Stellarium&copy; or your location.</p></span>
-		        </div>
-		      </div>
-		    </div>
+				<div class="col s12 m8 offset-m2">
+					<div class="card-panel center-align">
+						<span class="black-text"><p class="flow-text">This is the web interface for controlling the Stargaze star pointer. Send your position to the server controlled laser pointer and select wether to track Stellarium&copy; or your location.</p></span>
+					</div>
+				</div>
+			</div>
 
 		    <div class="message-queue hidden"></div>
 			
 			<div class="row button-row">
-		    	<div class="center col s12 m8 offset-m2">
-		    		<a class="waves-effect waves-light btn-large light-blue darken-2 sendLoc"><i class="material-icons left">location_on</i>Send Location</a>
-		    		<a class="waves-effect waves-light btn-large light-blue darken-2 calibrate"><i class="material-icons left">open_with</i>Calibrate</a>
-		    	</div>
-		    </div>
+				<div class="center col s12 m8 offset-m2">
+					<a class="waves-effect waves-light btn-large light-blue darken-2 sendLoc"><i class="material-icons left">location_on</i>Send Location</a>
+				</div>
+			</div>
 			
 			<div class="row button-row">
-		    	<div class="center col s12 m8 offset-m2">
-		    		<a class="waves-effect waves-light btn-large red darken-4 trackISS"><i class="material-icons left">my_location</i>Track ISS</a>
-		    		<a class="waves-effect waves-light btn-large red darken-4 power-button m2"><i class="material-icons left">power_settings_new</i>Turn Off</a>
-		    	</div>
-		    </div>
+				<div class="center col s12 m8 offset-m2">
+					<a class="waves-effect waves-light btn-large  darken-2 iss"><i class="material-icons left">my_location</i>Track ISS</a>
+					<a class="waves-effect waves-light btn-large  darken-2 stellarium m2"><i class="material-icons left" style="width: 20px;">star_rate</i>Use Stellarium</a>
+				</div>
+			</div>
+
+			<div class="row button-row">
+				<div class="center col s12 m8 offset-m2">
+					<a class="waves-effect waves-light btn-large  darken-2 power-button m2"><i class="material-icons left">power_settings_new</i>Stand By</a>
+				</div>
+			</div>
 
 	    </div><!-- End container -->
 
 		<footer class="page-footer blue-grey darken-4">
-          <div class="container">
-            <div class="row">
-              <div class="col l6 s12">
-                <h5 class="white-text">About Stargazer</h5>
-                <p class="grey-text text-lighten-4">Stargazer is a project created by Jonathan Juursema, Guido Kuijper, Rzonnie Jonkman & Peter Verzijl. It is a colaboration project between Computer Science and Electrical Engineering students. This project is its result.</p>
-              </div>
-              <div class="col l4 offset-l2 s12">
-                <h5 class="white-text">Links</h5>
-                <ul>
-                  <li><a class="grey-text text-lighten-3" href="https://github.com/jonathanjuursema/StargazerServer/blob/master/LICENSE">License</a></li>
-                  <li><a class="grey-text text-lighten-3" href="http://www.stellarium.org/" target="blank">Stellarium&copy;</a></li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          <div class="footer-copyright blue-grey darken-3">
-            <div class="container">
-            &copy; 2015 Copyright Stargaze Team
-            <a class="grey-text text-lighten-4 right" href="#!">More Links</a>
-            </div>
-          </div>
-        </footer>
-	
+			<div class="container">
+				<div class="row">
+					<div class="col m6 s12">
+						<h5 class="white-text">About Stargazer</h5>
+						<p class="grey-text text-lighten-4">Stargazer is a project created by Jonathan Juursema, Guido Kuijper, Rzonnie Jonkman & Peter Verzijl. It is a colaboration project between Computer Science and Electrical Engineering students. This project is its result.</p>
+					</div>
+					<div class="col m4 offset-m2 s12">
+						<h5 class="white-text">Info</h5>
+						<ul>
+							<li><a class="grey-text text-lighten-3" href="//github.com/jonathanjuursema/StargazerServer/blob/master/LICENSE">License</a></li>
+							<li><a class="grey-text text-lighten-3" href="//www.stellarium.org/" target="blank">Stellarium&copy;</a></li>
+						</ul>
+						<h5 class="white-text">Contributors</h5>
+						<ul>
+							<li><a class="grey-text text-lighten-3" href="//www.jonathanj.nl">Jonathan Juursema</a></li>
+							<li><a class="grey-text text-lighten-3" href="//www.peterverzijl.com">Peter Verzijl</a></li>
+							<li class="grey-text text-lighten-3">Guido Kuijper</li>
+							<li class="grey-text text-lighten-3">Remi Jonkman</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+			<div class="footer-copyright blue-grey darken-3">
+				<div class="container">
+					&copy; 2015 Copyright Stargaze Team
+					<a class="grey-text text-lighten-4 right" href="#!">More Links</a>
+				</div>
+			</div>
+		</footer>
+
 		<!--Import Socket.IO-->
 		<script type="text/javascript" src="//cdn.socket.io/socket.io-1.3.7.js"></script>
 		<!--Import jQuery before materialize.js-->
@@ -98,9 +110,5 @@
   		<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.1/js/materialize.min.js"></script>
 		<!--Import our own main.js-->
 		<script type="text/javascript" src="/js/main.js"></script>
-    </body>
+	</body>
 </html>
-
-// on/off button -> default off		(on(2) / off(0) emit (server mode))
-// button align center
-// Calibrate button 				(calibrate emit)
