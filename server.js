@@ -348,14 +348,7 @@ initspi();
 var satellites;
 
 setInterval(function() {
-  if (server.servermode == 1) {   
-  
-    exec("python ./sat.py --list", parselist);
-    
-    function parselist(error, stdout, stderr) {
-      satellites = stdout.split(/\n/);
-      sendgui("satellites",satellites);
-    }
+  if (server.servermode == 1) {
     
     exec("python ./sat.py --lat="+server.location.lat+" --lon="+server.location.lon+" --sat=\""+server.satellite+"\" --alt", parsealt);
     
@@ -369,18 +362,25 @@ setInterval(function() {
       server.iss.az = stdout;
     }
 
+  }   
+  
+  exec("python ./sat.py --list", parselist);
+  
+  function parselist(error, stdout, stderr) {
+    satellites = stdout.split(/\n/);
+    sendgui("satellites",satellites);
   }
+    
 }, 1000);
 
 var readtelemetry = function() {
-  if (server.servermode == 1) {
-    var file = fs.createWriteStream("./satellites.dat");
-    var request = httpalt.get("http://www.celestrak.com/NORAD/elements/stations.txt", function(response) {
-      response.pipe(file);
-    });
-    console.log("Read telemetry data for satellites.");
-  }
+  var file = fs.createWriteStream("./satellites.dat");
+  var request = httpalt.get("http://www.celestrak.com/NORAD/elements/stations.txt", function(response) {
+    response.pipe(file);
+  });
+  console.log("Read telemetry data for satellites.");
 }
 
 // Read new telemetry data every hour.
 setInterval(readtelemetry, 3600*1000);
+readtelemetry();
