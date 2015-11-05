@@ -9,6 +9,7 @@ var sys = require('sys')
 var exec = require('child_process').exec;
 var httpalt = require('http');
 var fs = require('fs');
+var serialport = require("serialport").SerialPort;
 
 // Usefull functions 
 Number.prototype.mod = function(n) {
@@ -64,7 +65,7 @@ var coreserver = function() {
     s.location = {'lat':0.0,'lon':0.0};
     s.iss = {'alt':0.0,'az':0.0};
     s.satellite = "";
-    setInterval(s.bursttosoc, 100);
+    setInterval(s.bursttoarduino, 1000);
   }
   
   // Listener
@@ -188,32 +189,23 @@ var coreserver = function() {
     
   }
       
-  this.bursttosoc = function() {
+  this.bursttoarduino = function() {
   
-    if (soc !== false) {
+    if (arduino !== false) {
       
-      var startword = 0x7FFFFFFE; // arbitrarily chosen, but out of the reach of the data: (+360 deg, 0x15752A00; -360 deg, 0xEA8AD600)
-      var endword = 0x7FFFFFFF;
-      
-      var c = s.calculatesphericalcoordinates(s.target);
-      
-      /* Everything is multiplied by 2^17 to make casting on the FPGA much easier*/
       if (s.servermode == 0) {
-        s.sendsoc( startword );
-        s.sendsoc( Math.round(0.0 * 131072) );
-        s.sendsoc( Math.round(0.0 * 131072) );
-        s.sendsoc( endword );
+        var d = 0;
+        var a = 0;
       } else if (s.servermode == 1) {
-        s.sendsoc( startword );
-        s.sendsoc( Math.round(s.iss.alt * 131072) );
-        s.sendsoc( Math.round(s.iss.az * 131072) );
-        s.sendsoc( endword );
+        var d = Math.round(s.iss.az / 360 * 2857);
+        var a = Math.round(s.iss.alt / 360 * 2857);
       } else if (s.servermode == 2) {
-        s.sendsoc( startword );
-        s.sendsoc( Math.round(c.alt * 131072) );
-        s.sendsoc( Math.round(c.az * 131072) );
-        s.sendsoc( endword );
+        var c = s.calculatesphericalcoordinates(s.target);
+        var d = Math.round(c.az / 360 * 2857);
+        var a = Math.round(c.alt / 360 * 2857);
       }
+      
+      s.sendarduino( "D"+d+"A"+a );
                   
     }
     
@@ -221,22 +213,14 @@ var coreserver = function() {
   
   this.debugthroughput = flagset("debugthroughput");
   
-  this.sendsoc = function(data) {
-    
-    if (soc !== false) {
-      
-      var txbuf = new Buffer(4);
-      var rxbuf = new Buffer(4);
-      
-      txbuf.writeInt32BE(data);
-            
-      soc.transfer(txbuf, rxbuf, function(device, buf) {});
-      
-      if (s.debugthroughput) {
-        console.log("[tx]", txbuf, "[rx]", rxbuf, "[parsed]", (txbuf.readInt32BE(0) / 131072).hr(), " | ", (rxbuf.readInt32BE(0) / 131072).hr())
-      }
+  this.sendarduino = function(data) {
+    if (arduino !== false) {
+      arduino.write(data+"\n", function() {     
+        if (s.debugthroughput) {
+          console.log("[tx] ", data);
+        }     
+      });
     }
-    
   }
   
   this.init();
@@ -323,24 +307,22 @@ function sendgui(event, data) {
 
 /* Establishing SPI connection */
 
-var soc = false;
+var arduino = false;
 
-function initspi() {
+function initserial() {
   
-  if (flagset("nospi")) {
-    console.info("SPI interface not loaded on user request.");
+  if (flagset("noserial")) {
+    console.info("Serial interface not loaded on user request.");
     return;
   }
   
-  spi = require('spi');
-  
-  soc = new spi.Spi('/dev/spidev0.0', {'chipSelect': spi.CS['none'], 'mode': spi.MODE['MODE_2'], 'maxSpeed': 1000000, 'bitOrder': false}, function(s){s.open();});
-  
-  console.info("SPI interface loaded.");
+  arduino = new serialport("/dev/ttyACM10", {
+    baudrate: 9600
+  });  
   
 }
 
-initspi();
+initserial();
 
 /* Fetching ISS coordinates. */
 
