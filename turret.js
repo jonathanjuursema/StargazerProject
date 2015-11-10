@@ -2,7 +2,8 @@
 
 /* Loading required dependencies. */
 var config = require("./config.js");
-var serialport = require("serialport").SerialPort;
+var serialport = require("serialport");
+var SerialPort = serialport.SerialPort;
 var io = require('socket.io-client');
 
 var target = { 'az': 0, 'alt': 0 }
@@ -11,35 +12,30 @@ var prevtarget = { 'az': 0, 'alt': 0 }
 
 /* Establishing Arduino connection */
 var arduino = false;
-var arduinoopen = false;
 
 function initserial() {
   
-  arduino = new serialport("/dev/ttyACM0", {
-    baudrate: 9600
-  });  
-  
-  arduino.open(function() {
-      arduinoopen = true;
+  arduino = new SerialPort("/dev/ttyACM0", {
+    baudrate: 9600,
+    parser: serialport.parsers.readline("\r\n")
   });
   
   arduino.on("data", function(data) {
     var d = data.split("D");
-    var a = d[0].split("A");
+    var a = d[1].split("A");
     d = a[0];
     a = a[1];
-    io.emit('setorientation', { 'alt': (a / config.stepsperrev * 360), 'az': (d / config.stepsperrev * 360) });
+    socket.emit('setorientation', { 'alt': (a / config.stepsperrev * 360), 'az': (d / config.stepsperrev * 360) });
   });
   
 }
-
-//initserial();
 
 var socket = io.connect('http://'+config.hostname+':'+config.webport);
 
 socket.on('connect', function() {
 	console.log('Connected to the server.');
   socket.emit('becometurret', config.secret);
+  initserial();
 });
 
 socket.on('turret', function(data) {
@@ -54,16 +50,8 @@ socket.on('target', function(data) {
   if (prevtarget.az != target.az || prevtarget.alt != prevtarget.alt) {
     prevtarget.az = target.az; prevtarget.alt = prevtarget.alt;
     var cmd = "D"+target.az+"A"+target.alt;
-    console.log("[tx] ", cmd);
-    if (arduinoopen !== false) {
-      arduino.write(data+"\n", function() {});
+    if (arduino !== false) {
+      arduino.write(cmd, function(error) {});
     }
   }
 });
-
-/*
-    
-  this.sendarduino = function(data) {
-  }
-  
-*/
