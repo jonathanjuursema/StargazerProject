@@ -81,10 +81,10 @@ def main(argv):
     print(sat.az * degrees_per_radian)
     
   if r == "ra":
-    print(sat.g_ra * degrees_per_radian)
+    print(sat.a_ra * degrees_per_radian)
   
   if r == "dec":
-    print(sat.g_dec * degrees_per_radian)
+    print(sat.a_dec * degrees_per_radian)
     
 if __name__ == "__main__":
    main(sys.argv[1:])

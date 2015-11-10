@@ -7,6 +7,10 @@ body {
 	background-color: #1a1a1a;
 }
 
-.disabled {
+.hidden {
   opacity: 0.5;
+}
+
+.invisible {
+  opacity: 0;
 }

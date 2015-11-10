@@ -39,43 +39,49 @@
         </div>
       </div>
       
-      <div id="clients-container" class="row disabled">
-        <div class="col s12 m12">
-            <div class="card grey darken-4">
-              <div class="card-content white-text">
-                <span id="clients">
-                </span>
-              </div>
-            </div>
+      <div class="row">
+        <div class="col s12 m5 l3 offset-l2">
+          <p>
+            <a class="red-text text-darken-4 btn-large darken-4 grey" style="display: block"><i class="material-icons left">query_builder</i>Local: <span id="localtime"></span></a>
+          </p>
+        </div>
+        <div class="col s12 m2 l2 hide-on-small-only">
+          <p>
+            <a class="red-text text-darken-4 btn-large darken-4 grey" style="display: block"><span id="timediff"></span></a>
+          </p>
+        </div>
+        <div class="col s12 m5 l3">
+          <p>
+            <a class="red-text text-darken-4 btn-large darken-4 grey" style="display: block"><i class="material-icons left">query_builder</i>Server: <span id="servertime"></span></a>
+          </p>
         </div>
       </div>
-    
+      
       <div id="controls" class="row disabled">
         <div class="col s12 m6 l3">
-          <div id="control-buttons" style="display: none">
-            <p>
-              <a id="update_location" class="red-text text-darken-4 waves-effect waves-red btn-large darken-4 grey" style="display: block"><i class="material-icons left">location_on</i>Update location</a>
-            </p>
-            <p>
-              <a id="toggle_safemode" class="red-text text-darken-4 waves-effect waves-red btn-large darken-4 grey" style="display: block"><i class="material-icons left">visibility_off</i>Safe mode</a>
-            </p>
-            <br>
-            <p>
-              <a id="toggle_standby" class="red-text text-darken-4 waves-effect waves-red btn-large darken-4 grey" style="display: block"><i class="material-icons left">power_settings_new</i>Stand-by</a>
-            </p>
-            <p>
-              <a id="toggle_stellarium" class="red-text text-darken-4 waves-effect waves-red btn-large darken-4 grey" style="display: block"><i class="material-icons left">star_rate</i>Use Stellarium</a>
-            </p>
-            <p>
-              <a id="toggle_satellite" class="red-text text-darken-4 waves-effect waves-red btn-large darken-4 grey" style="display: block"><i class="material-icons left">settings_input_antenna</i>Track satellite</a>
-            </p>
-          </div>
           <div id="become-admin">
             <p>
               <a id="elevate_connection" class="red-text text-darken-4 waves-effect waves-red btn-large darken-4 grey" style="display: block"><i class="material-icons left">verified_user</i>Assume control</a>
             </p>
           </div>
+          <p>
+            <a id="update_location" class="admin-button red-text text-darken-4 waves-effect waves-red btn-large darken-4 grey" style="display: block"><i class="material-icons left">location_on</i>Update location</a>
+          </p>
+          <p>
+            <a id="toggle_safemode" class="admin-button red-text text-darken-4 waves-effect waves-red btn-large darken-4 grey" style="display: block"><i class="material-icons left">visibility_off</i>Safe mode</a>
+          </p>
+          <br>
+          <p>
+            <a id="toggle_standby" class="admin-button red-text text-darken-4 waves-effect waves-red btn-large darken-4 grey" style="display: block"><i class="material-icons left">power_settings_new</i>Stand-by</a>
+          </p>
+          <p>
+            <a id="toggle_stellarium" class="admin-button red-text text-darken-4 waves-effect waves-red btn-large darken-4 grey" style="display: block"><i class="material-icons left">star_rate</i>Stellarium</a>
+          </p>
 				</div>
+        
+        <div id="satlist" class="col s12 m6 l3">
+          &nbsp;
+        </div>
         
         <div class="col s12 m6 l3">
           <p>
@@ -83,20 +89,17 @@
               <div class="card-content white-text">
                 <span class="card-title red-text text-darken-4">Target</span>
                 <p class="red-text text-darken-4">
-                  Right Ascension: <span id="target-ra" class="text-darken-4">0.0&deg;</span><br>
-                  Declination: <span id="target-dec" class="text-darken-4">0.0&deg;</span>
+                  Right Ascension: <span id="target-ra" class="text-darken-4">0.0</span> hrs<br>
+                  Declination: <span id="target-dec" class="text-darken-4">0.0</span>&deg;
                 </p>
                 <br>
                 <p class="red-text text-darken-4">
-                  Altitude: <span id="target-alt" class="text-darken-4">0.0&deg;</span><br>
-                  Azimuth: <span id="target-az" class="text-darken-4">0.0&deg;</span>
+                  Altitude: <span id="target-alt" class="text-darken-4">0.0</span>&deg;<br>
+                  Azimuth: <span id="target-az" class="text-darken-4">0.0</span>&deg;
                 </p>
               </div>
             </div>
           </p>
-				</div>
-        
-        <div class="col s12 m6 l3">
           <p>
             <div class="card grey darken-4">
               <div class="card-content white-text">
@@ -108,9 +111,6 @@
               </div>
             </div>
           </p>
-				</div>
-        
-        <div class="col s12 m6 l3">
           <p>
             <div class="card grey darken-4">
               <div class="card-content white-text">
@@ -122,7 +122,19 @@
               </div>
             </div>
           </p>
+				</div>
+      
+        <div id="clients-container" class="col s12 m6 l3 disabled">
+          <p>
+            <div class="card grey darken-4">
+              <div class="card-content white-text">
+                <span id="clients">
+                </span>
+              </div>
+            </div>
+          </p>
         </div>
+
 			</div>
     </div>
 

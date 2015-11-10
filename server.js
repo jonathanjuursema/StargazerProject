@@ -13,29 +13,6 @@ var exec = require('child_process').exec;
 var httpalt = require('http');
 var fs = require('fs');
 
-// Usefull functions 
-Number.prototype.mod = function(n) {
-    return ((this%n)+n)%n;
-};
-Number.prototype.torad = function() {
-    return this * Math.PI / 180;
-};
-Number.prototype.todeg = function() {
-    return this * 180 / Math.PI;
-};
-Number.prototype.hr = function() {
-    return this.toFixed(3);
-};
-
-var flagset = function(flag) {  
-  for (i = 0; i < process.argv.length; i++) {
-    if (process.argv[i] == "--"+flag) {
-      return true;
-    }
-  }
-  return false;
-}
-
 /* Starting core server. */
 
 var coreserver = require('./server-coreserver.js');
@@ -83,6 +60,13 @@ socketio.on('connection', function(socket) {
   socket.sockettype = 'gui';  
   
   console.info("New incoming GUI connection from "+socket.handshake.address+".");
+    
+  socket.on('safemode', function(data) {
+    if (socket.sockettype == 'admin') {
+      server.safemode = !server.safemode;
+      console.log("Toggled safemode. Now: "+server.safemode);
+    }
+  });
     
   socket.on('setmode', function(data) {
     if (socket.sockettype == 'admin') {
