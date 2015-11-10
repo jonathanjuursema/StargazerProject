@@ -112,6 +112,8 @@ function Server(params) {
   };
 
   this.write = function (position) {
+    
+    var position = position;
 
     var obuffer = new ExponentialBuffer(24)
       , time = microtime.now()

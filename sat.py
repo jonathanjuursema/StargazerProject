@@ -18,10 +18,10 @@ def main(argv):
   target = "";
   
   try:
-    opts, args = getopt.getopt(argv,"",["lat=","lon=","alt","az","list","sat="])
+    opts, args = getopt.getopt(argv,"",["lat=","lon=","alt","az","ra","dec","list","sat="])
     
   except getopt.GetoptError:
-    print 'sat.py --lat=0.0 --lon=0.0 --sat=name [ --alt | --az ]'
+    print 'sat.py --lat=0.0 --lon=0.0 --sat=name [ --alt | --az | --ra | --dec ]'
     print 'sat.py --list'
     sys.exit(2)
     
@@ -47,6 +47,10 @@ def main(argv):
       r = "alt"
     elif opt == "--az":
       r = "az"
+    elif opt == "--ra":
+      r = "ra"
+    elif opt == "--dec":
+      r = "dec"
   
   with open('./satellites.dat') as f:
     teldata = f.read().splitlines()
@@ -75,6 +79,12 @@ def main(argv):
   
   if r == "az":
     print(sat.az * degrees_per_radian)
+    
+  if r == "ra":
+    print(sat.g_ra * degrees_per_radian)
+  
+  if r == "dec":
+    print(sat.g_dec * degrees_per_radian)
     
 if __name__ == "__main__":
    main(sys.argv[1:])

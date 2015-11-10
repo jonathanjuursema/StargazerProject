@@ -1,4 +1,7 @@
+/* This program should be run on a server that is always available and publicly reachable. Can also be run on the turret itself, but this complicates reaching the turret if
+
 /* Loading required dependencies. */
+var config = require("./config.js");
 var express = require('express');
 var app = express();
 var http = require('http').Server(app);
@@ -9,7 +12,6 @@ var sys = require('sys')
 var exec = require('child_process').exec;
 var httpalt = require('http');
 var fs = require('fs');
-var serialport = require("serialport").SerialPort;
 
 // Usefull functions 
 Number.prototype.mod = function(n) {
@@ -36,196 +38,7 @@ var flagset = function(flag) {
 
 /* Starting core server. */
 
-var coreserver = function() {
-  
-  /* Server variable initialization */
-  
-  // Shorthand
-  var s = this;
-  // Global Stellarium server
-  var stellarium;
-    // Server mode: 0 (off), 1 (tracking ISS), 2 (tracking Stellarium object)
-  var servermode;  
-  // Tracking target. Is only used when mode=2, but can be set when another mode is active.
-  var target;
-  // Current turret direction.
-  var direction;
-  // Server GPS location.
-  var location;
-  // ISS location.
-  var iss;
-    
-  /* Main functions */
-  
-  // Init function
-  this.init = function() {
-    s.servermode = 0;
-    s.target = {'ra':0.0,'dec':0.0};
-    s.direction = {'ra':0.0,'dec':0.0};
-    s.location = {'lat':0.0,'lon':0.0};
-    s.iss = {'alt':0.0,'az':0.0};
-    s.satellite = "";
-    setInterval(s.bursttoarduino, 1000);
-  }
-  
-  // Listener
-  this.listen = function() {
-    
-  }
-  
-  // Sets the server in a different mode
-  this.setmode = function(newmode) {
-    switch(newmode) {
-      case 0:
-        console.info("Server switching mode from "+s.servermode+" to "+newmode+".");
-        sendgui('setmode',{'mode':0,'text':'Mode changed to off.'});
-        s.servermode = 0;
-        return true;
-        
-      case 1:
-        console.info("Server switching mode from "+s.servermode+" to "+newmode+".");
-        sendgui('setmode',{'mode':1,'text':'Mode changed to track ISS.'});
-        s.servermode = 1;
-        return true;
-      
-      case 2:
-        console.info("Server switching mode from "+s.servermode+" to "+newmode+".");
-        sendgui('setmode',{'mode':2,'text':'Mode changed to track Stellarium object.'});
-        s.servermode = 2;
-        return true;
-        
-      default:
-        console.warn("Invalid server mode ("+newmode+") - remaining in mode "+s.servermode+".");
-        sendgui('setmode',{'mode':s.servermode,'text':'Invalid mode.'});
-        return false;
-    }
-  }
-  
-  // Sets new target coordinates for the server
-  this.settarget = function(newcoordinates) {
-    newcoordinates = s.convertstellariumcoordinates(newcoordinates);
-    
-    if(!(newcoordinates.ra === Number(newcoordinates.ra) && newcoordinates.ra % 1 !== 0) || !(newcoordinates.dec === Number(newcoordinates.dec) && newcoordinates.dec % 1 !== 0)) {
-      console.warn("New target coordinates ["+newcoordinates.ra+", "+newcoordinates.dec+"] are not valid. Keeping old ones.");
-      return false;
-    }
-        
-    s.target.ra = newcoordinates.ra; s.target.dec = newcoordinates.dec;
-    console.info("New target set to [RA "+s.target.ra.hr()+" hrs, DEC "+s.target.dec.hr()+" deg].");
-    sendgui('message',{'text': 'A new target has been selected on the following celestial coordinates: RA '+s.target.ra.hr()+', DEC '+s.target.dec.hr()+'.'});
-        
-    return true;
-  }
-  
-  this.setlocation = function(newlocation) {
-    if(!(newlocation.lat === Number(newlocation.lat) && newlocation.lat % 1 !== 0) || !(newlocation.lon === Number(newlocation.lon) && newlocation.lon % 1 !== 0)) {
-      console.warn("New location ["+newlocation.lat+", "+newlocation.lon+"] are not valid. Keeping old one.");
-      sendgui('message',{'text': "Recevied invalid coordinates ["+newlocation.lat+", "+newlocation.lon+"], keeping old ones."});
-      return false;
-    }
-    
-    s.location.lat = newlocation.lat; s.location.lon = newlocation.lon;
-    console.info("New location set to [LAT "+s.location.lat.hr()+" deg, LON "+s.location.lon.hr()+" deg].");
-    sendgui('message',{'text': "New server location has been set to ["+s.location.lat.hr()+", "+s.location.lon.hr()+"]."});
-    return true;
-  }
-  
-  this.getj2000date = function() {
-    // J2000 calculation comes from http://jtauber.github.io/mars-clock/
-    var d = new Date(); // current time
-    var m = d.getTime(); // ms since unix epoch UTC
-    var jdut = 2440587.5 + (m / 86400000); // julian date (see site)
-    var jdtt = jdut + ((35+32.184) / 86400); // julian date accounting for leap seconds (see site)
-    var j2000 = jdtt - 2451545; // conversion to J2000 date! yay! (see site)
-    return j2000;
-  }
-  
-  this.getj2000hour = function() {
-    var d = new Date(), h = d.getUTCHours(), m = d.getUTCMinutes(), s = d.getUTCSeconds(), u = d.getUTCMilliseconds();
-    return (h + (m/60) + (s/3600) + (u/(3600*1000)));
-  }
-  
-  this.convertstellariumcoordinates = function(coordinates) {
-    coordinates.ra = ((coordinates.ra / (2*Math.PI)) * 24);
-    
-    coordinates.dec = ((coordinates.dec / (2*Math.PI)) * 360);
-    coordinates.dec = (coordinates.dec > 180 ? (coordinates.dec - 360) : coordinates.dec);
-    
-    return coordinates;
-  }
-  
-  this.calculatesphericalcoordinates = function(coordinates) {
-    
-    var spherical = { 'ra':coordinates.ra, 'dec':coordinates.dec }
-    
-    if (s.location.lat == 0.0 && s.location.lon == 0.0) {
-      spherical.alt = 0.0;
-      spherical.az = 0.0;
-      return spherical;
-    }
-    
-    var d = new Date();
-    
-    // calculation comes from http://www.stargazing.net/kepler/altaz.html
-    spherical.ra = spherical.ra * (360/24); // convert from hours to degrees
-    spherical.lst = ( 100.46 + 0.985647 * s.getj2000date() + s.location.lon + ( 15 * s.getj2000hour() ) ); // get local siderial time (see site)
-    spherical.lst = spherical.lst.mod(360);
-    spherical.ha = ( spherical.lst - spherical.ra ); // get hour angle
-    spherical.ha = spherical.ha.mod(360);
-    
-    spherical.sinalt = Math.sin(spherical.dec.torad()) * Math.sin(s.location.lat.torad()) + Math.cos(spherical.dec.torad()) * Math.cos(s.location.lat.torad()) * Math.cos(spherical.ha.torad());
-    spherical.alt = Math.asin(spherical.sinalt);
-    spherical.cosaz = ( Math.sin(spherical.dec.torad()) - Math.sin(spherical.alt) * Math.sin(s.location.lat.torad()) ) / ( Math.cos(spherical.alt) * Math.cos(s.location.lat.torad()) );
-    spherical.az = Math.acos(spherical.cosaz);
-    
-    spherical.alt = spherical.alt.todeg() + 90;
-    if (Math.sin(spherical.ha.torad()) >= 0) {
-      spherical.az = 360 - spherical.az.todeg();
-    } else {
-      spherical.az = spherical.az.todeg();
-    }
-    
-    return spherical;
-    
-  }
-      
-  this.bursttoarduino = function() {
-  
-    if (arduino !== false) {
-      
-      if (s.servermode == 0) {
-        var d = 0;
-        var a = 0;
-      } else if (s.servermode == 1) {
-        var d = Math.round(s.iss.az / 360 * 2857);
-        var a = Math.round(s.iss.alt / 360 * 2857);
-      } else if (s.servermode == 2) {
-        var c = s.calculatesphericalcoordinates(s.target);
-        var d = Math.round(c.az / 360 * 2857);
-        var a = Math.round(c.alt / 360 * 2857);
-      }
-      
-      s.sendarduino( "D"+d+"A"+a );
-                  
-    }
-    
-  }
-  
-  this.debugthroughput = flagset("debugthroughput");
-  
-  this.sendarduino = function(data) {
-    if (arduino !== false) {
-      arduino.write(data+"\n", function() {     
-        if (s.debugthroughput) {
-          console.log("[tx] ", data);
-        }     
-      });
-    }
-  }
-  
-  this.init();
-  
-}
+var coreserver = require('./server-coreserver.js');
 
 var server = new coreserver();
 
@@ -240,8 +53,8 @@ var stellariumserver = function(params) {
   });
   
   var interval = setInterval(function() {
-    stellariumserverinstance.write(server.direction);
-  }, 500);
+    //stellariumserverinstance.write(server.direction);
+  }, 250);
 
   stellariumserverinstance.listen();
 
@@ -249,7 +62,7 @@ var stellariumserver = function(params) {
 }
 
 var stellarium = new stellariumserver({
-      port: 5050,
+      port: config.stellariumport,
       debug: false,
       quiet: true,
       type: 'Stellarium',
@@ -259,74 +72,69 @@ var stellarium = new stellariumserver({
 /* Starting webserver */
 
 app.use(express.static('htdocs'));
-http.listen(process.env.PORT || 5000);
+http.listen(process.env.PORT || config.webport);
 
 /* Handling Socket.IO throughput */
 
-var gui = false;
-
 socketio.on('connection', function(socket) {
   
-  if (gui === false) {
-    gui = socket;
-    console.info("New incoming GUI connection from "+socket.handshake.address+".");
-    gui.emit('init', {'location':server.location,'target':server.target,'mode':server.servermode});
-  } else {
-    console.info("New incoming GUI connection from "+socket.handshake.address+", but we're already busy.");
-    socket.emit('message', {'text':'This server is already occupied. Please try again later.'});
-    socket.disconnect();
-    gui.emit('message', {'text':'Another client tried to connect to our server from '+socket.handshake.address+'.'});
-  }
   
+  server.clients[socket.id] = socket;
+  socket.sockettype = 'gui';  
+  
+  console.info("New incoming GUI connection from "+socket.handshake.address+".");
+    
   socket.on('setmode', function(data) {
-    server.setmode(data.mode);    
+    if (socket.sockettype == 'admin') {
+      server.setmode(data);   
+    }
   });
   
   socket.on('setlocation', function(data) {
-    server.setlocation(data);
+    if (socket.sockettype == 'admin') {
+      server.setlocation(data);
+    }
   });
   
   socket.on('setsatellite', function(data) {
-    console.log("Now tracking satellite "+data+".");
-    server.satellite = data;
+    if (socket.sockettype == 'admin') {
+      console.log("Now tracking satellite "+data+".");
+      server.satellite = data;
+    }
+  });
+  
+  socket.on('setorientation', function(data) {
+    if (socket.sockettype == 'turret') {
+      server.orientation = data;
+    }
+  });
+  
+  socket.on('becomeadmin', function(data) { 
+    if (data == config.password) {
+      socket.sockettype = 'admin';
+      console.log(socket.handshake.address+" promoted to admin.");
+    }
+  });
+  
+  socket.on('becometurret', function(data) {
+      if (data == config.secret) {
+        socket.sockettype = 'turret';
+        socket.emit('turret', true);
+        if (server.turret !== false) {
+          server.turret.disconnect();
+        }
+        server.turret = socket;
+      }
   });
   
   socket.on('disconnect', function() {
     console.info("Client "+socket.handshake.address+" disconnected.");
-    socket.emit('message', {'text':'Disconnecting...'});
-    gui = false;
+    delete server.clients[socket.id];
   });
   
 });
 
-function sendgui(event, data) {
-  if (gui !== false) {
-    gui.emit(event, data);
-  }
-}
-
-/* Establishing SPI connection */
-
-var arduino = false;
-
-function initserial() {
-  
-  if (flagset("noserial")) {
-    console.info("Serial interface not loaded on user request.");
-    return;
-  }
-  
-  arduino = new serialport("/dev/ttyACM10", {
-    baudrate: 9600
-  });  
-  
-}
-
-initserial();
-
 /* Fetching ISS coordinates. */
-
-var satellites;
 
 setInterval(function() {
   if (server.servermode == 1) {
@@ -334,13 +142,25 @@ setInterval(function() {
     exec("python ./sat.py --lat="+server.location.lat+" --lon="+server.location.lon+" --sat=\""+server.satellite+"\" --alt", parsealt);
     
     function parsealt(error, stdout, stderr) {
-      server.iss.alt = (stdout*1)+90;
+      server.targetaltaz.alt = (stdout*1)+90;
     }
     
     exec("python ./sat.py --lat="+server.location.lat+" --lon="+server.location.lon+" --sat=\""+server.satellite+"\" --az", parseaz);
     
     function parseaz(error, stdout, stderr) {
-      server.iss.az = stdout;
+      server.targetaltaz.az = stdout;
+    }
+    
+    exec("python ./sat.py --lat="+server.location.lat+" --lon="+server.location.lon+" --sat=\""+server.satellite+"\" --ra", parsera);
+    
+    function parsera(error, stdout, stderr) {
+      server.target.ra = stdout;
+    }
+    
+    exec("python ./sat.py --lat="+server.location.lat+" --lon="+server.location.lon+" --sat=\""+server.satellite+"\" --dec", parsedec);
+    
+    function parsedec(error, stdout, stderr) {
+      server.target.dec = stdout;
     }
 
   }   
@@ -348,11 +168,10 @@ setInterval(function() {
   exec("python ./sat.py --list", parselist);
   
   function parselist(error, stdout, stderr) {
-    satellites = stdout.split(/\n/);
-    sendgui("satellites",satellites);
+    server.satellites = stdout.split(/\n/);
   }
     
-}, 1000);
+}, 250);
 
 var readtelemetry = function() {
   var file = fs.createWriteStream("./satellites.dat");

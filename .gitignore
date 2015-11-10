@@ -28,3 +28,6 @@ node_modules
 
 # Ignore satellite telemetry file
 satellites.dat
+
+# Ignore config file
+config.js

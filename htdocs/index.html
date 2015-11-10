@@ -1,117 +1,150 @@
 <!DOCTYPE html>
 <html>
-    <head>
-		<!--Import Google Icon Font-->
-		<link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-		<!--Import materialize.css-->
-		<!-- Compiled and minified CSS -->
-  		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.1/css/materialize.min.css">
-		<!--Import main.css-->
-		<link type="text/css" rel="stylesheet" href="css/main.css"  media="screen,projection"/>
-
-		<!--Let browser know website is optimized for mobile-->
+  <head>
+    <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons" type="text/css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/materialize/0.97.1/css/materialize.min.css" type="text/css">
+		<link rel="stylesheet" href="./style.css" type="text/css"/>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    </head>
+  </head>
 
-    <body>
-    	<div class="navbar-fixed">
-			<nav class="blue-grey darken-4">
-				<div class="nav-wrapper">
-				  <a href="#" class="brand-logo center	"><img class="center" src="/img/logo.svg" alt="/img/logo.png"></a>
-				  <ul id="nav-mobile" class="right hide-on-med-and-down">
-				  	<!--
-				    <li><a href="sass.html">Sass</a></li>
-				    <li><a href="badges.html">Components</a></li>
-				    <li><a href="collapsible.html">JavaScript</a></li>
-				    -->
-				  </ul>
-				</div>
-			</nav>
-		</div>
+  <body>
+  
+    <div class="navbar-fixed">
+      <nav class="grey darken-4">
+        <div class="nav-wrapper">
+          <a href="#" class="brand-logo center red-text text-darken-4">Stargazer</a>
+        </div>
+      </nav>
+    </div>
+    
+    <br>
 
 		<div class="container">
-			<!-- Page Content goes here -->
-	
-			<div class="row">
-				<div class="col s12 m8 offset-m2">
-					<div class="card-panel center-align">
-					<span class="black-text"><h1 class="header-text" style="font-weight: 900;">Welcome to Stargaze!</h1></span>
-					</div>
-				</div>
-			</div>
-
-			<div class="row">
-				<div class="col s12 m8 offset-m2">
-					<div class="card-panel center-align">
-						<span class="black-text"><p class="flow-text">This is the web interface for controlling the Stargaze star pointer. Send your position to the server controlled laser pointer and select whether to track Stellarium&copy; or your location.</p></span>
-					</div>
-				</div>
-			</div>
-			
-			<div class="row button-row">
-				<div class="center col s12 m8 offset-m2">
-					<a class="waves-effect waves-light btn-large light-blue darken-2 sendLoc"><i class="material-icons left">location_on</i>Send Location</a>
-				</div>
-			</div>
-			
-			<div class="row button-row">
-				<div class="center col s12 m8 offset-m2">
-					<!--<a class="waves-effect waves-light btn-large  darken-2 iss"><i class="material-icons left">my_location</i>Track ISS</a>-->
-					<a class="dropdown-button setsat btn-large darken-2 blue" href="#" data-activates="dropdown"><i class="material-icons left" style="width: 20px;">my_location</i>Track Satelite<a>
-					<ul id="dropdown" class="dropdown-content">
-					</ul>
-					<a class="waves-effect waves-light btn-large  darken-2 stellarium m2"><i class="material-icons left" style="width: 20px;">star_rate</i>Use Stellarium</a>
-				</div>
-			</div>
-
-			<div class="row button-row">
-				<div class="center col s12 m8 offset-m2">
-					<a class="waves-effect waves-light btn-large  darken-2 power-button m2"><i class="material-icons left">power_settings_new</i>Stand By</a>
-				</div>
-			</div>
+    
+      <div id="connecting" class="row">
+        <div class="col s12 m6 offset-m3 center">    
+          <br><br>          
+          <div class="preloader-wrapper active">
+            <div class="spinner-layer spinner-red-only">
+              <div class="circle-clipper left">
+                <div class="circle"></div>
+              </div><div class="gap-patch">
+                <div class="circle"></div>
+              </div><div class="circle-clipper right">
+                <div class="circle"></div>
+              </div>
+            </div>
+          </div>
+          <br><br>
+        </div>
+      </div>
       
-      <div class="message-queue hidden"></div>
+      <div id="clients-container" class="row disabled">
+        <div class="col s12 m12">
+            <div class="card grey darken-4">
+              <div class="card-content white-text">
+                <span id="clients">
+                </span>
+              </div>
+            </div>
+        </div>
+      </div>
+    
+      <div id="controls" class="row disabled">
+        <div class="col s12 m6 l3">
+          <div id="control-buttons" style="display: none">
+            <p>
+              <a id="update_location" class="red-text text-darken-4 waves-effect waves-red btn-large darken-4 grey" style="display: block"><i class="material-icons left">location_on</i>Update location</a>
+            </p>
+            <p>
+              <a id="toggle_safemode" class="red-text text-darken-4 waves-effect waves-red btn-large darken-4 grey" style="display: block"><i class="material-icons left">visibility_off</i>Safe mode</a>
+            </p>
+            <br>
+            <p>
+              <a id="toggle_standby" class="red-text text-darken-4 waves-effect waves-red btn-large darken-4 grey" style="display: block"><i class="material-icons left">power_settings_new</i>Stand-by</a>
+            </p>
+            <p>
+              <a id="toggle_stellarium" class="red-text text-darken-4 waves-effect waves-red btn-large darken-4 grey" style="display: block"><i class="material-icons left">star_rate</i>Use Stellarium</a>
+            </p>
+            <p>
+              <a id="toggle_satellite" class="red-text text-darken-4 waves-effect waves-red btn-large darken-4 grey" style="display: block"><i class="material-icons left">settings_input_antenna</i>Track satellite</a>
+            </p>
+          </div>
+          <div id="become-admin">
+            <p>
+              <a id="elevate_connection" class="red-text text-darken-4 waves-effect waves-red btn-large darken-4 grey" style="display: block"><i class="material-icons left">verified_user</i>Assume control</a>
+            </p>
+          </div>
+				</div>
+        
+        <div class="col s12 m6 l3">
+          <p>
+            <div class="card grey darken-4">
+              <div class="card-content white-text">
+                <span class="card-title red-text text-darken-4">Target</span>
+                <p class="red-text text-darken-4">
+                  Right Ascension: <span id="target-ra" class="text-darken-4">0.0&deg;</span><br>
+                  Declination: <span id="target-dec" class="text-darken-4">0.0&deg;</span>
+                </p>
+                <br>
+                <p class="red-text text-darken-4">
+                  Altitude: <span id="target-alt" class="text-darken-4">0.0&deg;</span><br>
+                  Azimuth: <span id="target-az" class="text-darken-4">0.0&deg;</span>
+                </p>
+              </div>
+            </div>
+          </p>
+				</div>
+        
+        <div class="col s12 m6 l3">
+          <p>
+            <div class="card grey darken-4">
+              <div class="card-content white-text">
+                <span class="card-title red-text text-darken-4">Location</span>
+                <p class="red-text text-darken-4">
+                  Latitude: <span id="current-lat" class="text-darken-4">0.0&deg;</span><br>
+                  Longitude: <span id="current-lon" class="text-darken-4">0.0&deg;</span>
+                </p>
+              </div>
+            </div>
+          </p>
+				</div>
+        
+        <div class="col s12 m6 l3">
+          <p>
+            <div class="card grey darken-4">
+              <div class="card-content white-text">
+                <span class="card-title red-text text-darken-4">Turret</span>
+                <p class="red-text text-darken-4">
+                  Altitude: <span id="current-alt" class="text-darken-4">0.0&deg;</span><br>
+                  Azimuth: <span id="current-az" class="text-darken-4">0.0&deg;</span>
+                </p>
+              </div>
+            </div>
+          </p>
+        </div>
+			</div>
+    </div>
 
-	    </div><!-- End container -->
-
-		<footer class="page-footer blue-grey darken-4">
+		<footer class="page-footer grey darken-4">
 			<div class="container">
 				<div class="row">
-					<div class="col m6 s12">
-						<h5 class="white-text">About Stargazer</h5>
-						<p class="grey-text text-lighten-4">Stargazer is a project created by Jonathan Juursema, Guido Kuijper, Rzonnie Jonkman & Peter Verzijl. It is a colaboration project between Computer Science and Electrical Engineering students. This project is its result.</p>
-					</div>
-					<div class="col m4 offset-m2 s12">
-						<h5 class="white-text">Info</h5>
-						<ul>
-							<li><a class="grey-text text-lighten-3" href="//github.com/jonathanjuursema/StargazerServer/blob/master/LICENSE">License</a></li>
-							<li><a class="grey-text text-lighten-3" href="//www.stellarium.org/" target="blank">Stellarium&copy;</a></li>
-						</ul>
-						<h5 class="white-text">Contributors</h5>
-						<ul>
-							<li><a class="grey-text text-lighten-3" href="//www.jonathanj.nl">Jonathan Juursema</a></li>
-							<li><a class="grey-text text-lighten-3" href="//www.peterverzijl.com">Peter Verzijl</a></li>
-							<li class="grey-text text-lighten-3">Guido Kuijper</li>
-							<li class="grey-text text-lighten-3">Remi Jonkman</li>
-						</ul>
+					<div class="col m12 s12" style="text-align: justify;">
+						<h5 class="red-text text-darken-4">About Stargazer</h5>
+						<p class="red-text text-darken-4">Stargazer is a project that started out as a collaborative exercise between Creative Technology and Electrical Engineering students at the University of Twente. After the prototype was finished and the exercise was over, the project was further improved and extended. The (messy) source code of this project is available on <a href="//github.com/jonathanjuursema/StargazerServer" class="red-text text-darken-4">GitHub</a>.</p>
 					</div>
 				</div>
 			</div>
-			<div class="footer-copyright blue-grey darken-3">
+			<div class="footer-copyright grey darken-4">
 				<div class="container">
-					&copy; 2015 Copyright Stargaze Team
-					<a class="grey-text text-lighten-4 right" href="#!">More Links</a>
+					<span class="red-text text-darken-4 right">Originally developed in 2015 by <a href="//www.jonathanj.nl" class="red-text text-darken-4">Jonathan Juursema</a>, <a href="//www.peterverzijl.com" class="red-text text-darken-4">Peter Verzijl</a>, Guido Kuijper and Remi Jonkman at the University of Twente.</span>
 				</div>
 			</div>
 		</footer>
 
-		<!--Import Socket.IO-->
 		<script type="text/javascript" src="//cdn.socket.io/socket.io-1.3.7.js"></script>
-		<!--Import jQuery before materialize.js-->
 		<script type="text/javascript" src="//code.jquery.com/jquery-2.1.1.min.js"></script>
-		<!-- Compiled and minified JavaScript -->
-  		<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.1/js/materialize.min.js"></script>
-		<!--Import our own main.js-->
-		<script type="text/javascript" src="/js/main.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/materialize/0.97.1/js/materialize.min.js"></script>
+		<script type="text/javascript" src="./script.js"></script>
 	</body>
 </html>

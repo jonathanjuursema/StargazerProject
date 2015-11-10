@@ -16,7 +16,7 @@
     "node-telescope-server": "latest",
     "express": "latest",
     "socket.io": "latest",
-    "spi": "latest",
+    "socket.io-client": "latest",
     "serialport": "latest"
   },
   "preferGlobal": "false",
