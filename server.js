@@ -10,7 +10,6 @@ var spi;
 var stellariumservermodule = require('./stellarium.js');
 var sys = require('sys')
 var exec = require('child_process').exec;
-var httpalt = require('http');
 var fs = require('fs');
 
 /* Starting core server. */
@@ -155,14 +154,10 @@ setInterval(function() {
     server.satellites = stdout.split(/\n/);
   }
     
-}, 250);
+}, 500);
 
 var readtelemetry = function() {
-  var file = fs.createWriteStream("./satellites.dat");
-  var request = httpalt.get("http://www.celestrak.com/NORAD/elements/stations.txt", function(response) {
-    response.pipe(file);
-  });
-  console.log("Read telemetry data for satellites.");
+    exec("wget --post-data='identity="+config.spacetrack.identity+"&password="+config.spacetrack.password+"&query=https://www.space-track.org/basicspacedata/query/class/tle_latest/orderby/NORAD_CAT_ID%20desc/format/3le/predicates/OBJECT_NAME,TLE_LINE1,TLE_LINE2/ORDINAL/1/NORAD_CAT_ID/25544,37820,20580,25867,40730,30794,26243,39084,00005,10953/' 'https://www.space-track.org/ajaxauth/login' -O satellites.dat", function(){console.log("Read satellite telemetry data.");});
 }
 
 // Read new telemetry data every hour.
