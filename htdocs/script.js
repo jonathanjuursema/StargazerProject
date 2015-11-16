@@ -82,17 +82,20 @@ socket.on('update', function(data) {
   
   switch(serverdata.servermode) {
     case 0: 
+      pagetitle("Stand-By");
       $("#toggle_standby").removeClass("grey red-text").addClass("red grey-text");
       $("#toggle_stellarium").addClass("grey red-text").removeClass("red grey-text");
       $(".setsat").addClass("grey red-text").removeClass("red grey-text");
       break;
     
     case 1:
+      pagetitle("Tracking "+serverdata.satellite);
       $("#toggle_standby").addClass("grey red-text").removeClass("red grey-text");
       $("#toggle_stellarium").addClass("grey red-text").removeClass("red grey-text");
       break;
       
     case 2:
+      pagetitle("Stellarium (RA "+parseFloat(data.target.ra/360*24).toFixed(3)+" hrs, DEC "+parseFloat(data.target.dec).toFixed(3)+" deg)");
       $("#toggle_standby").addClass("grey red-text").removeClass("red grey-text");
       $("#toggle_stellarium").removeClass("grey red-text").addClass("red grey-text");
       $(".setsat").addClass("grey red-text").removeClass("red grey-text");
@@ -161,6 +164,10 @@ function activatesatlist() {
   $(".select_sat:eq("+satlistiterator+")").removeClass("invisible");
   satlistiterator++;
   setTimeout(activatesatlist, 100);
+}
+
+function pagetitle(title) {
+  document.title = title + " :: StargazerProject.SPACE";
 }
 
 Number.prototype.hr = function() {
