@@ -1,0 +1,28 @@
+var config = {};
+
+// Configuration file example
+
+// The steps per revolution for your Arduino-controlled motor.
+config.stepsperrev = 400;
+
+// The hostname on which to listen.
+config.hostname = 'example.com';
+
+// The port on which to listen.
+config.webport = 5000;
+
+// The secret that'll allow the turret to connect.
+config.secret = 'correct horse battery staple';
+
+// The port stallarium can connect on.
+config.stellariumport = '5001';
+
+// The password to control the turret.
+config.password = 'correct horse battery staple';
+
+// SpaceTrack credentials
+config.spacetrack = {};
+config.spacetrack.identity = 'spacetrack@example.com';
+config.spacetrack.password = 'correct horse battery staple';
+
+module.exports = config;
